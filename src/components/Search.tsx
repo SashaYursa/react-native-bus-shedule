@@ -1,13 +1,29 @@
-import React, { useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import styled from 'styled-components/native'
 
-type Props = {}
+type Props = {
+  updateFilter: (val: string) => void
+}
 
-const Search: React.FC<Props> = (props: Props) => {
+const Search: React.FC<Props> = ({updateFilter}: Props) => {
     const [value, setValue] = useState('')
+    useLayoutEffect(() => {
+      updateFilter(value)
+    }, [value])
+
+    const clearInput = () => {
+      setValue('')
+    }
+
     return (
         <SearchBar>
             <SearchInput value={value} onChangeText={setValue}/>
+            { value && 
+              <ClearInputValue onPress={clearInput}>
+                <Icon size={20} name="backspace"/>
+              </ClearInputValue>
+            }
         </SearchBar>
     )
 }
@@ -28,6 +44,15 @@ const SearchInput = styled.TextInput`
   border-radius: 12px;
   border: none;
   flex-grow: 1;
+`
+const ClearInputValue = styled.TouchableOpacity`
+  padding: 10px;
+  border-radius: 12px;
+  background-color: #eaeaea;
+  margin-left: 10px;
+  height: 100%;
+  align-items: center;
+  flex-direction: row;
 `
 
 export default Search;

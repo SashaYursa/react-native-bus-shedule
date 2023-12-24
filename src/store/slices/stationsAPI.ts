@@ -1,5 +1,5 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
-import {IBusStations} from '../types';
+import {IBusStations, ISheduleItem} from '../types';
 
 export const stationApi = createApi({
   reducerPath: 'stationsApi',
@@ -8,10 +8,10 @@ export const stationApi = createApi({
     getStations: build.query<IBusStations[], void>({
       query: () => '/busStations',
     }),
-    // getShedule: build.query<any, void>({
-    //   query: () => '/shedule/22',
-    // }),
+    getShedule: build.query<ISheduleItem[], number>({
+      query: (id: number) => `/shedule/${id}`,
+    }),
   }),
 });
 
-export const {useGetStationsQuery} = stationApi;
+export const {useGetStationsQuery, useGetSheduleQuery} = stationApi;

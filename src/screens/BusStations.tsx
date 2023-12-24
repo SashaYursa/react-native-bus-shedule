@@ -5,6 +5,11 @@ import styled from 'styled-components/native'
 import { IBusStations } from '../store/types'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Search from '../components/Search'
+import { } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { BusStackParamList } from '../navigation/Navigation'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 const month = [
   'січня',
@@ -21,9 +26,8 @@ const month = [
   'грудня',
 ]
 
-type Props = {}
-
-const BusStations: React.FC<Props> = (props: Props) => {
+const BusStations = ({navigation, route}: NativeStackScreenProps<BusStackParamList, 'BusStations'>) => {
+  const netInfo = useNetInfo()
   const {data: stations, isLoading: stationsLoading, error} = useGetStationsQuery()
   const transformDate = (date: number): string => {
     if(date < 10){
@@ -31,12 +35,18 @@ const BusStations: React.FC<Props> = (props: Props) => {
     }
     return String(date)
   } 
+  const [filteredStations, setFilteredStations] = useState(stations) 
+
+  const updateFilter = (value: string) => {
+    setFilteredStations(stations?.filter(station => station.stationName.includes(value)))
+  }
+
 
   const busStation = (station: IBusStations) => {
     const lastUpdateDate = new Date(station.last_updated_at)
     const lastUpdate = lastUpdateDate.getDate() + " " + month[lastUpdateDate.getMonth()] + " " + transformDate(lastUpdateDate.getHours()) + ":" + transformDate(lastUpdateDate.getMinutes())
     return (
-      <BusStationButton>
+      <BusStationButton onPress={() => {navigation.navigate("StationShedule", {station: station})}}>
         <BusStationIcon>
           <Icon name='bus-multiple' size={50}/>
         </BusStationIcon>
@@ -64,11 +74,19 @@ const BusStations: React.FC<Props> = (props: Props) => {
   }
   return (
     <Container>
-      <Search/>
+      <Search updateFilter={updateFilter}/>
+      {!netInfo.isConnected &&
+        <LostInternetConnectionContainer>
+          <Icon name='alert-circle' size={25} color='#FFB534'/>
+          <Text style={{marginLeft: 5}}>
+            No internet connection
+          </Text>
+        </LostInternetConnectionContainer>
+      }
       <View style={{borderBottomColor: '#eaeaea', borderBottomWidth: 1, width: '100%', marginBottom: 5, marginTop: 5}}/>
       {
         stations?.length 
-        ? <FlatList  renderItem={({item}) => busStation(item)} data={stations}/>
+        ? <FlatList  renderItem={({item}) => busStation(item)} data={filteredStations}/>
         : <Text>No data</Text>
       }
     </Container>
@@ -82,7 +100,13 @@ flex-shrink: 1;
 background-color: #fff;
 `
 
+const LostInternetConnectionContainer = styled.View`
+  padding: 10px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 
+`
 
 const BusStationButton = styled.TouchableOpacity`
   flex-direction: row;

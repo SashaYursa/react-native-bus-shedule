@@ -13,6 +13,7 @@ import {
 } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {stationApi} from './slices/stationsAPI';
+import netInfo from './slices/netInfo';
 
 const persistConfig = {
   key: 'root',
@@ -20,6 +21,7 @@ const persistConfig = {
 };
 const rootReducer = combineReducers({
   todos: todoSlice,
+  netInfo: netInfo,
   [stationApi.reducerPath]: stationApi.reducer,
 });
 

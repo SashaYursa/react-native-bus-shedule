@@ -8,3 +8,17 @@ export interface IBusStations {
   stationLastUpdate: string;
   last_updated_at: string;
 }
+export interface ISheduleItem {
+  arrivalTime: string;
+  busInfo: string;
+  busOwner: string;
+  busRoute: string;
+  cost: string;
+  dateDeparture: string;
+  emptyPlaces: number;
+  id: number;
+  routeLink: string;
+  ticketsStatus: string;
+  timeDeparture: string;
+  updated_At: string;
+}
