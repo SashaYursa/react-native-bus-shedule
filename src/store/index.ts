@@ -18,6 +18,7 @@ import netInfo from './slices/netInfo';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
+  whitelist: ['todos'],
 };
 const rootReducer = combineReducers({
   todos: todoSlice,

@@ -10,6 +10,7 @@ export const stationApi = createApi({
     }),
     getShedule: build.query<ISheduleItem[], number>({
       query: (id: number) => `/shedule/${id}`,
+      keepUnusedDataFor: 5,
     }),
   }),
 });

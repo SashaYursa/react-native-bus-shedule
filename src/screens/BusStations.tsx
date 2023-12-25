@@ -11,7 +11,7 @@ import { BusStackParamList } from '../navigation/Navigation'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useNetInfo } from '@react-native-community/netinfo'
 
-const month = [
+export const month = [
   'січня',
   'лютого',
   'березня',
