@@ -8,9 +8,10 @@ import BusSheduleI from '../screens/BusShedule'
 import { Text, View } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import StationShedule from '../screens/StationShedule'
-import { IBusStations } from '../store/types'
+import { IBusRoute, IBusStations, ISheduleItem } from '../store/types'
 import { useAppDispatch } from '../store';
 import { setInfo } from '../store/slices/netInfo';
+import Route from '../screens/Route'
 type Props = {}
 
 type RootBottomTabsParamList = {
@@ -21,6 +22,7 @@ type RootBottomTabsParamList = {
 export type BusStackParamList = {
   BusStations: undefined;
   StationShedule: { station: IBusStations };
+  BusRoute: ISheduleItem;
 };
 export type BusFindStackParamList = {
 };
@@ -31,11 +33,14 @@ const Stack = createNativeStackNavigator<BusStackParamList>();
 
 const BusShedule = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{
+      animation: 'fade_from_bottom',
+    }}>
       <Stack.Screen name="BusStations" component={BusStations} options={{
         headerShown: false
       }}/>
       <Stack.Screen name="StationShedule" component={StationShedule}/>
+      <Stack.Screen name="BusRoute" component={Route}/>
     </Stack.Navigator>
   )
 }

@@ -5,6 +5,8 @@
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
     /* Completeness */
+    "target": "ES6",
+    "lib": ["ES2023"],
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   }
 }

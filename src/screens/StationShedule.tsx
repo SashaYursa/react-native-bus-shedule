@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
-import { ActivityIndicator, FlatList, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Text, View, TouchableOpacity, Vibration } from 'react-native'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { BusStackParamList } from '../navigation/Navigation'
 import { useGetSheduleQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
-import { ISheduleItem } from '../store/types'
+import { IBusRoute, ISheduleItem } from '../store/types'
 import RouteLine from '../components/RouteLine'
 import { month } from './BusStations'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -28,7 +28,12 @@ const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackP
           return '0' + String(date)
         }
         return String(date)
-      } 
+    } 
+
+    const moveToRoute = (bus: ISheduleItem) => {
+        Vibration.vibrate(15)
+        navigation.navigate('BusRoute', bus)
+    } 
 
     const _renderItem = (item: ISheduleItem) => {
         const route = item.busRoute.split(' - ').map(str => str.trim().replace('#', '').replace('+', ''))
@@ -55,7 +60,7 @@ const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackP
         if(item.ticketsStatus.includes('Затримка')) cardBackgroud = 'rgba(169, 169, 1, 0.4)'
         if(item.ticketsStatus.includes('По прибуттю')) cardBackgroud = 'rgba(108, 231, 95, 0.5)'
         return(
-            <BusRouteButton style={{backgroundColor: cardBackgroud || 'rgba(134, 134, 134, 0.6)'}}>
+            <BusRouteButton onPress={() => moveToRoute(item)} style={{backgroundColor: cardBackgroud || 'rgba(134, 134, 134, 0.6)'}}>
                 <BusRouteCard style={{alignItems: 'center'}}>
                     <RouteEndpointsContainer>
                         <RouteEndpoint>
@@ -181,7 +186,7 @@ const BusRouteCard = styled.View`
     flex-grow: 1;
     flex-shrink: 1;
 `
-const BusRouteButton = styled.View`
+const BusRouteButton = styled.TouchableOpacity`
     padding: 10px;
     border-radius: 12px;
     background-color: rgba(127, 17, 224, .2);

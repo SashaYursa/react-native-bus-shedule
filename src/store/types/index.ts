@@ -21,3 +21,19 @@ export interface ISheduleItem {
   ticketsStatus: string;
   updated_At: string;
 }
+export interface IBusRoute {
+  bus: ISheduleItem;
+  route: {
+    dates: [[string | null]];
+    points: [
+      {
+        arrivalTime: number;
+        departureTime: number | null;
+        pointName: string;
+        isStation: boolean;
+        kilometresFromStation: number | null;
+        cost: number | null;
+      },
+    ];
+  } | null;
+}

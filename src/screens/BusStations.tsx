@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Button, Text, TextInput, View, ScrollView, FlatList, TouchableOpacity } from 'react-native'
+import { ActivityIndicator, Button, Text, TextInput, View, ScrollView, FlatList, TouchableOpacity, Vibration } from 'react-native'
 import {  useGetStationsQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
 import { IBusStations } from '../store/types'
@@ -41,12 +41,17 @@ const BusStations = ({navigation, route}: NativeStackScreenProps<BusStackParamLi
     setFilteredStations(stations?.filter(station => station.stationName.includes(value)))
   }
 
+  const moveToStationShedule = (station: IBusStations) => {
+    Vibration.vibrate(15)
+    navigation.navigate("StationShedule", {station})
+  }
+
 
   const busStation = (station: IBusStations) => {
     const lastUpdateDate = new Date(station.last_updated_at)
     const lastUpdate = lastUpdateDate.getDate() + " " + month[lastUpdateDate.getMonth()] + " " + transformDate(lastUpdateDate.getHours()) + ":" + transformDate(lastUpdateDate.getMinutes())
     return (
-      <BusStationButton onPress={() => {navigation.navigate("StationShedule", {station: station})}}>
+      <BusStationButton onPress={() => {moveToStationShedule(station)}}>
         <BusStationIcon>
           <Icon name='bus-multiple' size={50}/>
         </BusStationIcon>

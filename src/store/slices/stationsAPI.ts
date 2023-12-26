@@ -1,5 +1,5 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
-import {IBusStations, ISheduleItem} from '../types';
+import {IBusRoute, IBusStations, ISheduleItem} from '../types';
 
 export const stationApi = createApi({
   reducerPath: 'stationsApi',
@@ -12,7 +12,11 @@ export const stationApi = createApi({
       query: (id: number) => `/shedule/${id}`,
       keepUnusedDataFor: 5,
     }),
+    getRoute: build.query<IBusRoute, number>({
+      query: (busId: number) => `/routes/${busId}`,
+    }),
   }),
 });
 
-export const {useGetStationsQuery, useGetSheduleQuery} = stationApi;
+export const {useGetStationsQuery, useGetSheduleQuery, useGetRouteQuery} =
+  stationApi;
