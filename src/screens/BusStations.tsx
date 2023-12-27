@@ -28,14 +28,20 @@ export const month = [
 
 const BusStations = ({navigation, route}: NativeStackScreenProps<BusStackParamList, 'BusStations'>) => {
   const netInfo = useNetInfo()
-  const {data: stations, isLoading: stationsLoading, error} = useGetStationsQuery()
+  const {data: stations, isLoading: stationsLoading, error, refetch} = useGetStationsQuery()
   const transformDate = (date: number): string => {
     if(date < 10){
       return '0' + String(date)
     }
     return String(date)
   } 
-  const [filteredStations, setFilteredStations] = useState(stations) 
+  const [filteredStations, setFilteredStations] = useState(stations)
+  
+  useEffect(() => {
+    if(netInfo.isConnected){
+      refetch()
+    }
+  }, [netInfo.isConnected])
 
   const updateFilter = (value: string) => {
     setFilteredStations(stations?.filter(station => station.stationName.includes(value)))
