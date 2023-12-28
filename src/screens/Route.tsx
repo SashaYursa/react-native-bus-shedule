@@ -6,6 +6,8 @@ import { useGetRouteQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
 import { month } from './BusStations'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import MapView, { LatLng, Marker } from 'react-native-maps'
+import MapViewDirections, { MapViewDirectionsOrigin } from 'react-native-maps-directions'
 
 type Props = {}
 
@@ -22,7 +24,6 @@ const WEEK_DAYS = [
 const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'BusRoute'>) => {
     const routeData = route.params
     const {isLoading, error, isError, data} = useGetRouteQuery(Number(routeData.id));
-    console.log(JSON.stringify(data))
     useLayoutEffect(() => {
         if(data) {
             navigation.setOptions({
@@ -33,6 +34,32 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
             })
         }
     }, [data])
+
+    let waypoints: LatLng[] = [{
+        latitude: 0,
+        longitude: 0
+    }];
+    let firstPoint: MapViewDirectionsOrigin = {
+        latitude: 0,
+        longitude: 0
+    };
+    let lastPoint: MapViewDirectionsOrigin = {
+        latitude: 0,
+        longitude: 0
+    };
+
+    if(data?.route?.points){
+        waypoints = (data.route.points.filter(i => i.fullAddress !== null).map((point) => ({latitude: point?.location?.lat ? point?.location?.lat : 0, longitude: point?.location?.lng ? point?.location?.lng: 0})))
+        const first = waypoints.shift()
+        const last = waypoints.pop()
+        if(first){
+            firstPoint = first
+        }
+        if(last){
+            lastPoint = last
+        }
+    }
+    const GOOGLE_MAPS_APIKEY = ///input key;
     if(isError){
         return <View>
             <Text>
@@ -74,7 +101,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                             {week.map((dayItem, index) => {
                                 if(dayItem){
                                     const splitted = dayItem.split('-');
-                                    const day = splitted[0] + " " + month[(Number(splitted[1]) - 1)].substring(0, 3)
+                                    const day = splitted[0] + " " + month[(Number(splitted[1]) - 1)]?.substring(0, 3)
                                     return <WeekDay key={index} style={{backgroundColor: 'rgba(19, 191, 0, 0.7)'}}><DayText>{day}</DayText></WeekDay>
                                 }
                                 return <WeekDay key={index} style={{backgroundColor: 'rgba(134, 134, 134, 0.6)'}}><DayText>-</DayText></WeekDay>
@@ -139,6 +166,41 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                     )
                 })}
         </RouteContainer>
+        <MapContainer>
+            <MapView style={{width: '100%', height: '100%'}}
+            initialRegion={{
+                latitude: data?.route?.points[0]?.location?.lat ? data?.route?.points[0]?.location?.lat : 48.622373,
+                longitude: data?.route?.points[0]?.location?.lng ? data?.route?.points[0]?.location?.lng : 22.302257,
+                latitudeDelta: 0.2,
+                longitudeDelta: 0.2,
+            }}
+            >
+            <MapViewDirections
+                origin={firstPoint}
+                destination={lastPoint}
+                apikey={GOOGLE_MAPS_APIKEY}
+                optimizeWaypoints={true}
+                strokeColor='hotpink'
+                strokeWidth={3}
+                waypoints={waypoints} 
+                tappable={true}
+                // precision='high'
+            />
+                <Marker coordinate={firstPoint}>
+                    <Icon name='bus-multiple' size={30} color={'#000'}/>
+                </Marker>
+                {
+                    waypoints?.map((waypoint, index) => (
+                        <Marker key={`${waypoint.latitude}${waypoint.longitude}${index}`} coordinate={waypoint}>
+                            <Icon name='bus-stop' size={30} color={'#000'}/>
+                        </Marker>
+                    ))
+                }
+                <Marker coordinate={lastPoint}>
+                    <Icon name='bus-multiple' size={30} color={'#000'}/>
+                </Marker>
+            </MapView>
+        </MapContainer>
     </Container>
   )
 }
@@ -178,6 +240,17 @@ const RouteContainer = styled.View`
 margin: 5px;
 flex-grow: 1;
 flex-shrink: 1;
+`
+const MapContainer = styled.View`
+margin: 0 auto;
+width: 98%;
+height: 400px;
+align-items: center;
+justify-content: center;
+border-radius: 12px;
+overflow: hidden;
+border-color: 1px;
+margin-bottom: 20px;
 `
 const WeekContainer = styled.View`
 flex-direction: row;

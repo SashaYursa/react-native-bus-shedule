@@ -129,7 +129,11 @@ def reactNativeArchitectures() {
     return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
 }
 
+
 android {
+    defaultConfig {
+        // manifestPlaceholders = [GOGLE_MAPS_API_KEY: "$process.env.GOGLE_MAPS_API_KEY"]
+    }
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion

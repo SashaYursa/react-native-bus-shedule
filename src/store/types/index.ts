@@ -33,6 +33,8 @@ export interface IBusRoute {
         isStation: boolean;
         kilometresFromStation: number | null;
         cost: number | null;
+        fullAddress: string | null;
+        location: {lat: number; lng: number} | null;
       },
     ];
   } | null;
