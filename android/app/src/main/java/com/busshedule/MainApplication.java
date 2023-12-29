@@ -12,7 +12,7 @@ import com.facebook.soloader.SoLoader;
 import com.busshedule.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
+import com.lugg.RNCConfig.RNCConfigPackage;
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =

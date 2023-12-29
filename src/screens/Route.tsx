@@ -8,7 +8,7 @@ import { month } from './BusStations'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import MapView, { LatLng, Marker } from 'react-native-maps'
 import MapViewDirections, { MapViewDirectionsOrigin } from 'react-native-maps-directions'
-
+import Config from "react-native-config";
 type Props = {}
 
 const WEEK_DAYS = [
@@ -59,7 +59,6 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
             lastPoint = last
         }
     }
-    const GOOGLE_MAPS_APIKEY = ///input key;
     if(isError){
         return <View>
             <Text>
@@ -178,7 +177,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
             <MapViewDirections
                 origin={firstPoint}
                 destination={lastPoint}
-                apikey={GOOGLE_MAPS_APIKEY}
+                apikey={Config.GOGLE_MAPS_KEY}
                 optimizeWaypoints={true}
                 strokeColor='hotpink'
                 strokeWidth={3}

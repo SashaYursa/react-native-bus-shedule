@@ -3,7 +3,7 @@ import {IBusRoute, IBusStations, ISheduleItem} from '../types';
 
 export const stationApi = createApi({
   reducerPath: 'stationsApi',
-  baseQuery: fetchBaseQuery({baseUrl: 'http://192.168.0.105:3000/'}),
+  baseQuery: fetchBaseQuery({baseUrl: 'http://192.168.0.106:3000/'}),
   endpoints: build => ({
     getStations: build.query<IBusStations[], void>({
       query: () => '/busStations',

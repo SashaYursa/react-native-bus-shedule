@@ -43,6 +43,10 @@ const BusStations = ({navigation, route}: NativeStackScreenProps<BusStackParamLi
     }
   }, [netInfo.isConnected])
 
+  useEffect(() => {
+    console.log('error', error)
+  }, [error])
+
   const updateFilter = (value: string) => {
     setFilteredStations(stations?.filter(station => station.stationName.includes(value)))
   }

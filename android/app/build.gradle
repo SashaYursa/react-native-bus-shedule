@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply from: project(":react-native-config").projectDir.getPath() + "/dotenv.gradle"
 
 import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -81,6 +82,11 @@ import org.apache.tools.ant.taskdefs.condition.Os
 project.ext.react = [
     enableHermes: true,  // clean and rebuild if changing
 ]
+project.ext.envConfigFiles = [
+    development: ".env.development",
+    production:'.env.release'
+]
+
 
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
@@ -131,9 +137,6 @@ def reactNativeArchitectures() {
 
 
 android {
-    defaultConfig {
-        // manifestPlaceholders = [GOGLE_MAPS_API_KEY: "$process.env.GOGLE_MAPS_API_KEY"]
-    }
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -145,7 +148,18 @@ android {
         versionCode 1
         versionName "1.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
-
+        flavorDimensions 'env'
+        // productFlavors {
+        //     dev {
+        //         dimension 'env'
+        //         applicationIdSuffix ".development"
+        //     }
+        //     prod {
+        //         dimension 'env'
+        //         applicationIdSuffix ".release"
+        //     }
+        // }
+        resValue 'string', 'build_config_package','com.busshedule'
         if (isNewArchitectureEnabled()) {
             // We configure the CMake build only if you decide to opt-in for the New Architecture.
             externalNativeBuild {
@@ -257,7 +271,7 @@ dependencies {
 
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
-
+    implementation project(':react-native-config')
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
