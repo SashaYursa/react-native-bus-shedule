@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import React, { useEffect, useLayoutEffect } from 'react'
-import { ActivityIndicator, Button, Text, Vibration, View, ScrollView, StyleSheet } from 'react-native'
+import React, { useCallback, useEffect, useLayoutEffect } from 'react'
+import { ActivityIndicator, Button, Text, Vibration, View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 import { BusStackParamList } from '../navigation/Navigation'
 import { useGetRouteQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
@@ -8,9 +8,11 @@ import { month } from './BusStations'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import MapView, { LatLng, Marker } from 'react-native-maps'
 import MapViewDirections, { MapViewDirectionsOrigin } from 'react-native-maps-directions'
-import Config from "react-native-config";
+import RouteMap from '../components/RouteMap'
 type Props = {}
 
+export type waypoint = {id: number, name: string, position: LatLng, type: postionType} 
+type postionType = "station_position" | "current_point_position"
 const WEEK_DAYS = [
     'Пн',
     "Вт",
@@ -22,8 +24,8 @@ const WEEK_DAYS = [
 ]
 
 const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'BusRoute'>) => {
-    const routeData = route.params
-    const {isLoading, error, isError, data} = useGetRouteQuery(Number(routeData.id));
+    const {id} = route.params
+    const {isLoading, error, isError, data} = useGetRouteQuery(Number(id));
     useLayoutEffect(() => {
         if(data) {
             navigation.setOptions({
@@ -35,21 +37,41 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
         }
     }, [data])
 
-    let waypoints: LatLng[] = [{
-        latitude: 0,
-        longitude: 0
-    }];
-    let firstPoint: MapViewDirectionsOrigin = {
-        latitude: 0,
-        longitude: 0
-    };
-    let lastPoint: MapViewDirectionsOrigin = {
-        latitude: 0,
-        longitude: 0
-    };
+    let waypoints: waypoint[] | null = null;
+    let firstPoint: waypoint | null = null;
+    let lastPoint: waypoint | null  = null;
+
+    data?.route?.points.forEach(point => {
+        console.log(point.id, '  ', point.station.stationName)
+    })
+    const updateMapPoint = (pointLatLng: {latitude: number, longitude: number}, pointId: number) => {
+        console.log(pointLatLng, pointId, 'data')
+    }
 
     if(data?.route?.points){
-        waypoints = (data.route.points.filter(i => i.fullAddress !== null).map((point) => ({latitude: point?.location?.lat ? point?.location?.lat : 0, longitude: point?.location?.lng ? point?.location?.lng: 0})))
+        waypoints = (data.route.points.filter(i => i.fullAddress !== null).map((point) => {
+            if(point.latitude && point.longitude){
+                return {
+                    id: point.id,
+                    name: point.station.stationName,
+                    type:"current_point_position", 
+                    position: {
+                        latitude: point.latitude,
+                        longitude: point.longitude
+                    } 
+                }
+            }
+            return {
+                id: point.id,
+                name: point.station.stationName,
+                type: "station_position",
+                position: {
+                latitude: point?.station?.latitude ? Number(point?.station.latitude) : 0, 
+                longitude: point?.station?.longitude ? Number(point?.station?.longitude): 0
+                }
+            }
+        }))
+        waypoints = waypoints.filter(wp => wp.position.latitude !== 0 && wp.position.longitude !== 0)
         const first = waypoints.shift()
         const last = waypoints.pop()
         if(first){
@@ -72,8 +94,19 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                     <ActivityIndicator size='large'/>
                 </View>
     }
-    const firstDay = data?.route?.dates[0].find(j => !!j)
-    const lastDay = data?.route?.dates[data?.route?.dates.length - 1].findLast(j => !!j)
+    const firstDay = data?.route?.dates?.dates[0].find(j => !!j)
+    const lastDay = data?.route?.dates?.dates[data?.route?.dates?.dates.length - 1].findLast(j => !!j)
+    // console.log(JSON.stringify(data))
+    // return (
+    //     <View>
+    //         <Text>
+    //             12131
+    //         </Text>
+    //     </View>
+    // )
+
+    
+
     return (
     <Container>
         <DatesContainer>
@@ -94,7 +127,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                 })}
                 </WeekContainer>
                 {
-                data?.route?.dates.map((week, index) => {
+                data?.route?.dates?.dates.map((week, index) => {
                     return (
                         <WeekContainer key={index}>
                             {week.map((dayItem, index) => {
@@ -114,7 +147,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
         <RouteContainer>
                 {data?.route?.points.map((point, index) => {
                     return (
-                        <RouteItem key={point.pointName}>
+                        <RouteItem key={point.station.stationName}>
                             <RouteLineContainer>
                                 <RouteLine style={{borderLeftWidth: index === 0 ? 0 : 2}}/>
                                 <Icon style={style.routePointIcon} name="record-circle-outline" color="green" size={26}/>
@@ -122,11 +155,11 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                             </RouteLineContainer>
                             <RouteItemData>
                                 <BusStopContainer>
-                                    <BusStopText style={{...style.busStopTitle, color: point.isStation ? 'green' : '#000'}}>{String(point.pointName).trim()}</BusStopText>
+                                    <BusStopText style={{...style.busStopTitle, color: point.station.linkToSheduleBoard ? 'green' : '#000'}}>{String(point.station.stationName).trim()}</BusStopText>
                                 </BusStopContainer>
                                 <BusStopContainer>
                                     <BusStopContainer style={{alignSelf: 'flex-start'}}>
-                                        {String(point.departureTime).trim() &&
+                                        {point.departureTime !== null &&
                                         <>
                                             <Icon name='arrow-up-thin' size={25} color='green'/>
                                             <BusStopText>{String(point.departureTime).trim()} прибуття</BusStopText>
@@ -134,7 +167,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                                         }
                                     </BusStopContainer>
                                     <BusStopContainer style={{alignSelf: 'flex-end'}}>
-                                        { point.kilometresFromStation &&
+                                        { point.kilometresFromStation !== null &&
                                         <>
                                             <BusStopText>{point.kilometresFromStation}км.</BusStopText>
                                             <Icon name="map-marker-distance" size={25} color='green'/>
@@ -144,7 +177,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                                 </BusStopContainer>
                                 <BusStopContainer>
                                     <BusStopContainer style={{alignSelf: 'flex-start'}}>
-                                        { String(point.arrivalTime).trim() &&
+                                        { point.arrivalTime !== null &&
                                         <>
                                             <Icon name='arrow-down-thin' size={25} color='red'/>
                                             <BusStopText>{String(point.arrivalTime).trim()} відправлення</BusStopText>
@@ -152,7 +185,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                                         }
                                     </BusStopContainer>
                                     <BusStopContainer style={{alignSelf: 'flex-end'}}>
-                                        { point.cost &&
+                                        { point.cost !== null &&
                                         <>
                                             <BusStopText>{point.cost}грн.</BusStopText>
                                             <Icon name='cash' size={20} color='green'/>
@@ -165,41 +198,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                     )
                 })}
         </RouteContainer>
-        <MapContainer>
-            <MapView style={{width: '100%', height: '100%'}}
-            initialRegion={{
-                latitude: data?.route?.points[0]?.location?.lat ? data?.route?.points[0]?.location?.lat : 48.622373,
-                longitude: data?.route?.points[0]?.location?.lng ? data?.route?.points[0]?.location?.lng : 22.302257,
-                latitudeDelta: 0.2,
-                longitudeDelta: 0.2,
-            }}
-            >
-            <MapViewDirections
-                origin={firstPoint}
-                destination={lastPoint}
-                apikey={Config.GOGLE_MAPS_KEY}
-                optimizeWaypoints={true}
-                strokeColor='hotpink'
-                strokeWidth={3}
-                waypoints={waypoints} 
-                tappable={true}
-                // precision='high'
-            />
-                <Marker coordinate={firstPoint}>
-                    <Icon name='bus-multiple' size={30} color={'#000'}/>
-                </Marker>
-                {
-                    waypoints?.map((waypoint, index) => (
-                        <Marker key={`${waypoint.latitude}${waypoint.longitude}${index}`} coordinate={waypoint}>
-                            <Icon name='bus-stop' size={30} color={'#000'}/>
-                        </Marker>
-                    ))
-                }
-                <Marker coordinate={lastPoint}>
-                    <Icon name='bus-multiple' size={30} color={'#000'}/>
-                </Marker>
-            </MapView>
-        </MapContainer>
+        <RouteMap firstPoint={firstPoint} lastPoint={lastPoint} waypoints={waypoints} updateMapPoint={updateMapPoint}/>
     </Container>
   )
 }
@@ -240,17 +239,7 @@ margin: 5px;
 flex-grow: 1;
 flex-shrink: 1;
 `
-const MapContainer = styled.View`
-margin: 0 auto;
-width: 98%;
-height: 400px;
-align-items: center;
-justify-content: center;
-border-radius: 12px;
-overflow: hidden;
-border-color: 1px;
-margin-bottom: 20px;
-`
+
 const WeekContainer = styled.View`
 flex-direction: row;
 justify-content: center;

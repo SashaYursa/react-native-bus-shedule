@@ -1,10 +1,12 @@
 export interface IBusStations {
   id: number;
-  linkToSheduleBoard: string;
+  linkToSheduleBoard: string | null;
   stationName: string;
-  stationLink: string;
-  stationPhoneNumber: string;
-  stationAddress: string;
+  stationLink: string | null;
+  stationPhoneNumber: null;
+  stationAddress: string | null;
+  latitude: number;
+  longitude: number;
   stationLastUpdate: string;
   last_updated_at: string;
 }
@@ -24,17 +26,23 @@ export interface ISheduleItem {
 export interface IBusRoute {
   bus: ISheduleItem;
   route: {
-    dates: [[string | null]];
+    dates: {
+      id: number;
+      dates: [[string | null]];
+      last_updated_at: string | null;
+    };
     points: [
       {
-        arrivalTime: number;
-        departureTime: number | null;
-        pointName: string;
-        isStation: boolean;
+        id: number;
+        arrivalTime: string | null;
+        departureTime: string | null;
         kilometresFromStation: number | null;
         cost: number | null;
         fullAddress: string | null;
-        location: {lat: number; lng: number} | null;
+        latitude: number | null;
+        longitude: number | null;
+        last_updated_at: string;
+        station: IBusStations;
       },
     ];
   } | null;
