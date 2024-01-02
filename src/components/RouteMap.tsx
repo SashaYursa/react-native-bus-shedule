@@ -3,117 +3,59 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components/native'
 import MapView, { Callout, CalloutSubview, LatLng, Marker } from 'react-native-maps'
 import MapViewDirections from 'react-native-maps-directions'
-import { waypoint } from '../screens/Route'
+import { waypoint, waypoints } from '../screens/Route'
 import Config from "react-native-config";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import IconIonic from 'react-native-vector-icons/Ionicons'
 
 type Props = {
-    waypoints: waypoint[] | null
-    firstPoint: waypoint | null
-    lastPoint: waypoint | null
+    waypoints: waypoints
     updateMapPoint: (pointLatLng: LatLng, pointId: number) => void
+    navigateToMapScreen: () => void
 }
 
-const RouteMap = ({firstPoint, lastPoint, waypoints, updateMapPoint}: Props) => {
-    const [selectedMarker, setSelectedMarker] = useState<number | null>(null)
-    useEffect(() => {
-        console.log(selectedMarker)
-    }, [selectedMarker])
+const RouteMap = ({waypoints, updateMapPoint, navigateToMapScreen}: Props) => {
+    if(!waypoints?.last || !waypoints.first){
+        return <View><Text>Error</Text></View>
+    }
     return (
     <MapContainer>
         <MapView style={{width: '100%', height: '100%'}}
+        onPress={navigateToMapScreen}
         initialRegion={{
-            latitude: firstPoint?.position.latitude ? firstPoint?.position.latitude : 48.622373,
-            longitude: firstPoint?.position.longitude ? firstPoint?.position.longitude : 22.302257,
+            latitude: waypoints.first.position.latitude,
+            longitude: waypoints.first.position.longitude,
             latitudeDelta: 0.2,
             longitudeDelta: 0.2,
         }}
         >
         <MapViewDirections
-            origin={firstPoint?.position}
-            destination={lastPoint?.position}
+            origin={waypoints?.first?.position}
+            destination={waypoints?.last?.position}
             apikey={Config.GOGLE_MAPS_KEY}
             optimizeWaypoints={true}
             strokeColor='hotpink'
             strokeWidth={3}
-            waypoints={waypoints?.map(wp => wp.position)} 
+            waypoints={waypoints?.middle?.map(wp => wp.position)} 
             tappable={true}
             // precision='high'
         />
-            { firstPoint?.position &&
-                <Marker draggable={selectedMarker === firstPoint.id} title={firstPoint.name} coordinate={firstPoint?.position}>
-                    {selectedMarker !== firstPoint.id}{
-                        <Icon name='bus-multiple' size={30} color={'#000'}/>
-                    }
-                    {/* <Text>{data?.route?.points?.find(wp => wp.id === firstPoint?.id)?.station?.stationName}</Text> */}
-                </Marker>
-            }
+            <Marker title={waypoints.first.name} coordinate={waypoints.first.position}>
+                    <Icon name='bus-multiple' size={30} color={'#000'}/>
+            </Marker>
             {
-                waypoints?.map((waypoint, index) => (
+                waypoints?.middle?.map((waypoint, index) => (
                     <Marker title={waypoint.name} 
-                    draggable={selectedMarker === waypoint.id}
                     key={`${waypoint.position.latitude}${waypoint.position.longitude}${index}`} 
                     coordinate={waypoint.position}
                     >
-                        {selectedMarker !== waypoint.id && 
-                            <Icon name='bus-stop' size={30} color={'#000'}/>
-                        }
-                    <Callout onPress={(e) => {
-                        if(selectedMarker === waypoint.id){
-                            setSelectedMarker(null)
-                            if(e.nativeEvent.coordinate?.latitude && e.nativeEvent.coordinate?.longitude){
-                                updateMapPoint({latitude: e.nativeEvent.coordinate?.latitude, longitude: e.nativeEvent.coordinate?.longitude}, waypoint.id)
-                            }
-                        }else{
-                            setSelectedMarker(waypoint.id)
-                        }
-                        }} tooltip={true}>
-                    <View 
-                    style={{
-                        backgroundColor: "green", 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        paddingTop: 3, 
-                        paddingBottom: 3, 
-                        paddingLeft: 5, 
-                        paddingRight: 5, 
-                        borderRadius: 12,
-                        width: 200 
-                        }}>
-                        <Text style={{color: '#fff'}}>
-                            Перемістити точку
-                        </Text>
-                    </View>
-                </Callout>
-                        {/* <Text>{data?.route?.points?.find(wp => wp.id === waypoint?.id)?.station?.stationName}</Text> */}
+                        <IconIonic name='pin-outline' size={30} color={'#000'}/>
                     </Marker>
                 ))
             }
-            { lastPoint?.position &&
-            <Marker  draggable={selectedMarker === lastPoint.id} onDragEnd={(e) => {Alert.alert("Змінити розташування?", "")}} coordinate={lastPoint?.position}>
-                {selectedMarker !== lastPoint.id &&
-                    <Icon name='bus-multiple' size={30} color={'#000'}/>
-                }
-                <Callout tooltip={true}>
-                    <View 
-                    style={{
-                        backgroundColor: "green", 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        paddingTop: 3, 
-                        paddingBottom: 3, 
-                        paddingLeft: 5, 
-                        paddingRight: 5, 
-                        borderRadius: 12, 
-                        width: 200
-                        }}>
-                        <Text style={{color: '#fff'}}>
-                            Перемістити точку
-                        </Text>
-                    </View>
-                </Callout>
+            <Marker title={waypoints.last.name} coordinate={waypoints.last.position}>
+                <Icon name='bus-multiple' size={30} color={'#000'}/>
             </Marker>
-            }
         </MapView>
     </MapContainer>
   )

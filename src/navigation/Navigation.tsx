@@ -11,7 +11,8 @@ import StationShedule from '../screens/StationShedule'
 import { IBusRoute, IBusStations, ISheduleItem } from '../store/types'
 import { useAppDispatch } from '../store';
 import { setInfo } from '../store/slices/netInfo';
-import Route from '../screens/Route'
+import Route, { waypoints } from '../screens/Route'
+import Map from '../screens/Map'
 type Props = {}
 
 type RootBottomTabsParamList = {
@@ -23,6 +24,7 @@ export type BusStackParamList = {
   BusStations: undefined;
   StationShedule: { station: IBusStations };
   BusRoute: ISheduleItem;
+  Map: {waypoints: waypoints, busId: number}
 };
 export type BusFindStackParamList = {
 };
@@ -41,6 +43,10 @@ const BusShedule = () => {
       }}/>
       <Stack.Screen name="StationShedule" component={StationShedule}/>
       <Stack.Screen name="BusRoute" component={Route}/>
+      <Stack.Screen name="Map" options={{
+        animation: 'fade_from_bottom',
+        headerShown: false,
+        }} component={Map}/>
     </Stack.Navigator>
   )
 }

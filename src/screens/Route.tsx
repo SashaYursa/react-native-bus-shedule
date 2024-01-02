@@ -11,7 +11,12 @@ import MapViewDirections, { MapViewDirectionsOrigin } from 'react-native-maps-di
 import RouteMap from '../components/RouteMap'
 type Props = {}
 
-export type waypoint = {id: number, name: string, position: LatLng, type: postionType} 
+export type waypoint = {id: number, name: string, position: LatLng, type: postionType } 
+export type waypoints = {
+    first: waypoint,
+    middle: waypoint[] | null,
+    last: waypoint
+} | null
 type postionType = "station_position" | "current_point_position"
 const WEEK_DAYS = [
     'Пн',
@@ -26,6 +31,7 @@ const WEEK_DAYS = [
 const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'BusRoute'>) => {
     const {id} = route.params
     const {isLoading, error, isError, data} = useGetRouteQuery(Number(id));
+
     useLayoutEffect(() => {
         if(data) {
             navigation.setOptions({
@@ -37,19 +43,17 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
         }
     }, [data])
 
-    let waypoints: waypoint[] | null = null;
-    let firstPoint: waypoint | null = null;
-    let lastPoint: waypoint | null  = null;
+    let waypoints: waypoints = null
 
     data?.route?.points.forEach(point => {
-        console.log(point.id, '  ', point.station.stationName)
+        console.log(point.id, '+', point.station.stationName)
     })
     const updateMapPoint = (pointLatLng: {latitude: number, longitude: number}, pointId: number) => {
         console.log(pointLatLng, pointId, 'data')
     }
 
     if(data?.route?.points){
-        waypoints = (data.route.points.filter(i => i.fullAddress !== null).map((point) => {
+        let res: waypoint[] = (data.route.points.filter(i => i.fullAddress !== null).map((point) => {
             if(point.latitude && point.longitude){
                 return {
                     id: point.id,
@@ -71,14 +75,11 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                 }
             }
         }))
-        waypoints = waypoints.filter(wp => wp.position.latitude !== 0 && wp.position.longitude !== 0)
-        const first = waypoints.shift()
-        const last = waypoints.pop()
-        if(first){
-            firstPoint = first
-        }
-        if(last){
-            lastPoint = last
+        res = res.filter(wp => wp.position.latitude !== 0 && wp.position.longitude !== 0)
+        const first = res.shift()
+        const last = res.pop()
+        if(first && last){
+            waypoints = {first, middle: res, last}
         }
     }
     if(isError){
@@ -198,7 +199,15 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                     )
                 })}
         </RouteContainer>
-        <RouteMap firstPoint={firstPoint} lastPoint={lastPoint} waypoints={waypoints} updateMapPoint={updateMapPoint}/>
+        {
+            (waypoints && data) &&
+            //TODO Rewrite with MapMarker component
+            <RouteMap  
+            waypoints={waypoints} 
+            updateMapPoint={updateMapPoint} 
+            navigateToMapScreen={() => navigation.navigate('Map', {waypoints, busId: data.bus.id})}
+            />
+        }
     </Container>
   )
 }

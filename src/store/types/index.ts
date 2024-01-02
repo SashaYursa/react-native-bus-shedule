@@ -34,8 +34,8 @@ export interface IBusRoute {
     points: [
       {
         id: number;
-        arrivalTime: string | null;
         departureTime: string | null;
+        arrivalTime: string | null;
         kilometresFromStation: number | null;
         cost: number | null;
         fullAddress: string | null;
