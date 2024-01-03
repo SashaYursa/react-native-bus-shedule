@@ -45,9 +45,9 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
 
     let waypoints: waypoints = null
 
-    data?.route?.points.forEach(point => {
-        console.log(point.id, '+', point.station.stationName)
-    })
+    // data?.route?.points.forEach(point => {
+    //     console.log(point.id, '+', point.station.stationName)
+    // })
     const updateMapPoint = (pointLatLng: {latitude: number, longitude: number}, pointId: number) => {
         console.log(pointLatLng, pointId, 'data')
     }
@@ -60,8 +60,8 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                     name: point.station.stationName,
                     type:"current_point_position", 
                     position: {
-                        latitude: point.latitude,
-                        longitude: point.longitude
+                        latitude: point.latitude ? Number(point.latitude) : 0,
+                        longitude: point.longitude ? Number(point.longitude): 0
                     } 
                 }
             }
@@ -201,7 +201,6 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
         </RouteContainer>
         {
             (waypoints && data) &&
-            //TODO Rewrite with MapMarker component
             <RouteMap  
             waypoints={waypoints} 
             updateMapPoint={updateMapPoint} 

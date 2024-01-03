@@ -36,26 +36,32 @@ const RouteMap = ({waypoints, updateMapPoint, navigateToMapScreen}: Props) => {
             optimizeWaypoints={true}
             strokeColor='hotpink'
             strokeWidth={3}
+            onError={(error) => {console.log('error', error)}}
             waypoints={waypoints?.middle?.map(wp => wp.position)} 
             tappable={true}
             // precision='high'
         />
-            <Marker title={waypoints.first.name} coordinate={waypoints.first.position}>
-                    <Icon name='bus-multiple' size={30} color={'#000'}/>
-            </Marker>
+            <Marker 
+            icon={require('../assets/bus-station.png')} 
+            title={waypoints.first.name} 
+            coordinate={waypoints.first.position} />
             {
-                waypoints?.middle?.map((waypoint, index) => (
-                    <Marker title={waypoint.name} 
-                    key={`${waypoint.position.latitude}${waypoint.position.longitude}${index}`} 
-                    coordinate={waypoint.position}
-                    >
-                        <IconIonic name='pin-outline' size={30} color={'#000'}/>
-                    </Marker>
-                ))
+                waypoints?.middle?.map((waypoint, index) => {
+                        return (
+                            <Marker 
+                            key={`${waypoint.position.latitude}${waypoint.position.longitude}${index}`} 
+                            icon={require('../assets/pin.png')}
+                            title={waypoint.name} 
+                            coordinate={waypoint.position}
+                            />
+                        )
+                })
             }
-            <Marker title={waypoints.last.name} coordinate={waypoints.last.position}>
-                <Icon name='bus-multiple' size={30} color={'#000'}/>
-            </Marker>
+            <Marker 
+            icon={require('../assets/bus-station.png')}
+            title={waypoints.last.name} 
+            coordinate={waypoints.last.position}
+            />
         </MapView>
     </MapContainer>
   )

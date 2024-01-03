@@ -15,13 +15,13 @@ type Props = {
 }
 
 const MapMarker = ({isSelected, name, position, id, icon, savePosition, setSelectedMarker}: Props) => {
-    console.log(isSelected)
+    // console.log(isSelected)
     const markerRef = useRef<NativeMapMarker>(null)
 
     useEffect(() => {
         if(markerRef){
             markerRef.current?.hideCallout()
-            console.log('redraw')
+            // console.log('redraw')
         }
     }, [markerRef, isSelected])
 
@@ -48,6 +48,7 @@ const MapMarker = ({isSelected, name, position, id, icon, savePosition, setSelec
         onPress={(e) => {calloutAction(e)}} 
         tooltip={true}
         >
+            <Text style={{fontSize: 14, color: '#000', fontWeight: '700'}}>{name}</Text>
             <MarkerButton>
                 <Text style={{color: '#fff'}}>
                     { isSelected 
