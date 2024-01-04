@@ -32,7 +32,11 @@ export const store = configureStore({
   reducer: persistedReducer,
   middleware(getDefaultMiddleware) {
     return getDefaultMiddleware({
+      immutableCheck: {
+        warnAfter: 128,
+      },
       serializableCheck: {
+        warnAfter: 128,
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }).concat(stationApi.middleware);

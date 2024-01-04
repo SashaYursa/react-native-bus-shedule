@@ -83,33 +83,61 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
         }
     }
     if(isError){
-        return <View>
-            <Text>
-                Error fetch data
-                {String(JSON.stringify(error))}
-            </Text>
-        </View>
+        if('status' in error){
+                return <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                        <Text style={{fontSize: 16, color: '#000', fontWeight: '700'}}>
+                            Помилка при отриманні даних 
+                        </Text>
+                        {/* <Text style={{fontSize: 16, color: '#000', fontWeight: '700'}}>
+                            {JSON.stringify(error)} 
+                        </Text> */}
+                        <TouchableOpacity onPress={() => navigation.goBack()}
+                        style={{marginTop: 10, borderRadius: 12, backgroundColor: '#000', padding: 10}}>
+                            <Text style={{fontSize: 14, color: '#fff'}}>
+                                Назад
+                            </Text>
+                        </TouchableOpacity>
+                </View>
+        }
     }
     if(isLoading){
         return <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                     <ActivityIndicator size='large'/>
                 </View>
     }
-    const firstDay = data?.route?.dates?.dates[0].find(j => !!j)
-    const lastDay = data?.route?.dates?.dates[data?.route?.dates?.dates.length - 1].findLast(j => !!j)
-    // console.log(JSON.stringify(data))
-    // return (
-    //     <View>
-    //         <Text>
-    //             12131
-    //         </Text>
-    //     </View>
-    // )
-
-    
+    let firstDay = null;
+    let lastDay = null;
+    if(data?.route?.dates.dates?.length){
+        const dates = data.route.dates.dates;
+        let i = 0
+        while(!firstDay){
+            if(i > dates.length){
+                firstDay = '-'
+            }
+            const findDay = dates[i].find(j => !!j)
+            if(findDay){
+                firstDay = findDay
+            }else{
+                i++;
+            }
+        }
+        i = dates.length - 1
+        while(!lastDay){
+            if(i === 0){
+                lastDay = '-'
+            }
+            const findDay = dates[i].findLast(j => !!j)
+            if(findDay){
+                lastDay = findDay
+            }else{
+                i--;
+            }
+        }
+    }
 
     return (
     <Container>
+        {data?.route?.dates.dates.length ?
         <DatesContainer>
             <View style={{justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{fontSize: 16, fontWeight: '700', color: '#000'}}>
@@ -128,9 +156,9 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                 })}
                 </WeekContainer>
                 {
-                data?.route?.dates?.dates.map((week, index) => {
-                    return (
-                        <WeekContainer key={index}>
+                    data?.route?.dates?.dates.map((week, index) => {
+                        return (
+                            <WeekContainer key={index}>
                             {week.map((dayItem, index) => {
                                 if(dayItem){
                                     const splitted = dayItem.split('-');
@@ -138,13 +166,14 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                                     return <WeekDay key={index} style={{backgroundColor: 'rgba(19, 191, 0, 0.7)'}}><DayText>{day}</DayText></WeekDay>
                                 }
                                 return <WeekDay key={index} style={{backgroundColor: 'rgba(134, 134, 134, 0.6)'}}><DayText>-</DayText></WeekDay>
-                                })
-                            }
+                            })}
                         </WeekContainer>
                     )
-                    })
+                })
                 }
         </DatesContainer>
+        : <View style={{padding: 5, alignItems: 'center'}}><Text style={{fontSize: 16, fontWeight: '700', color: '#000'}}>Наразі відсутня інформація про дати курсування</Text></View>
+        }
         <RouteContainer>
                 {data?.route?.points.map((point, index) => {
                     return (
@@ -160,7 +189,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                                 </BusStopContainer>
                                 <BusStopContainer>
                                     <BusStopContainer style={{alignSelf: 'flex-start'}}>
-                                        {point.departureTime !== null &&
+                                        {point.departureTime &&
                                         <>
                                             <Icon name='arrow-up-thin' size={25} color='green'/>
                                             <BusStopText>{String(point.departureTime).trim()} прибуття</BusStopText>
@@ -178,7 +207,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                                 </BusStopContainer>
                                 <BusStopContainer>
                                     <BusStopContainer style={{alignSelf: 'flex-start'}}>
-                                        { point.arrivalTime !== null &&
+                                        { point.arrivalTime &&
                                         <>
                                             <Icon name='arrow-down-thin' size={25} color='red'/>
                                             <BusStopText>{String(point.arrivalTime).trim()} відправлення</BusStopText>

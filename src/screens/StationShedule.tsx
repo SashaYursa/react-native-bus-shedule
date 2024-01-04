@@ -42,8 +42,8 @@ const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackP
         const fromCurrentStation = routeStartPoint === station.stationName.toUpperCase()
         const departure = new Date(Number(item.departure))
         const arrival = new Date(Number(item.arrival))
-        const arrivalTime = arrival.getDate() + " " + month[arrival.getMonth() - 1] + " " + transformDate(arrival.getHours()) + ":" + transformDate(arrival.getMinutes())
-        const departureTime = departure.getDate() + " " + month[departure.getMonth() -1] + " " + transformDate(departure.getHours()) + ":" + transformDate(departure.getMinutes())
+        const arrivalTime = arrival.getDate() + " " + month[arrival.getMonth()] + " " + transformDate(arrival.getHours()) + ":" + transformDate(arrival.getMinutes())
+        const departureTime = departure.getDate() + " " + month[departure.getMonth()] + " " + transformDate(departure.getHours()) + ":" + transformDate(departure.getMinutes())
         let different = (arrival.getTime() - departure.getTime());
         let hours = Math.floor((different % 86400000) / 3600000);
         let minutes = Math.round(((different % 86400000) % 3600000) / 60000);
