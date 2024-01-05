@@ -14,10 +14,42 @@ type Props = {
     navigateToMapScreen: () => void
 }
 
+//@ts-ignore
+export const sliceArrayToConstLength = (arr, maxPoints) => {
+    let res = [...arr]
+    if(res.length === 0){
+        return [];
+    }
+    if(res.length < maxPoints){
+        return arr;
+    }
+    if(res.length > maxPoints){
+        while(res.length > maxPoints){
+            const needToRemove = res.length - maxPoints
+            let removeEvery = Math.ceil(res.length / needToRemove)
+            console.log(removeEvery, 'remove')
+            let lastRemoved = removeEvery
+            res = arr.filter((item: any, index: number) => {
+            if((index + 1) === lastRemoved){
+                    lastRemoved += removeEvery
+                return false
+                }
+            return true
+            })
+        }
+    console.log(arr, 'old')
+    console.log(res, 'new')
+    return res
+    }
+    return []
+}
+
 const RouteMap = ({waypoints, updateMapPoint, navigateToMapScreen}: Props) => {
     if(!waypoints?.last || !waypoints.first){
         return <View><Text>Error</Text></View>
     }
+    let middleWayPointsForDirection = sliceArrayToConstLength(waypoints.middle, 23)
+
     return (
     <MapContainer>
         <MapView style={{width: '100%', height: '100%'}}
@@ -37,7 +69,7 @@ const RouteMap = ({waypoints, updateMapPoint, navigateToMapScreen}: Props) => {
             strokeColor='hotpink'
             strokeWidth={3}
             onError={(error) => {console.log('error', error)}}
-            waypoints={waypoints?.middle?.map(wp => wp.position)} 
+            waypoints={middleWayPointsForDirection.map((wp: waypoint) => wp.position)} 
             tappable={true}
             // precision='high'
         />

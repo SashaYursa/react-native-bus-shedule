@@ -14,6 +14,8 @@ import MapMarker from '../components/MapMarker';
 import { CommonActions } from '@react-navigation/native';
 import MapRouteList from '../components/MapRouteList';
 import { IBusRoute } from '../store/types';
+import ErrorLoad from '../components/ErrorLoad';
+import { sliceArrayToConstLength } from '../components/RouteMap';
 
 export type mapPoint = {
     isMissed: boolean,
@@ -39,11 +41,6 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
             setData(res)
         }
     }, [res])
-
-    useEffect(() => {
-        console.log(updatePointData, 'error')
-        console.log(updatePointError, 'data')
-    }, [updatePointData, updatePointError])
 
     let waypoints: waypoints = null
 
@@ -78,6 +75,9 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
             waypoints = {first, middle: res, last}
         }
     }
+
+    //need to rework
+    const wayPointsForMiddleDirection = sliceArrayToConstLength(waypoints?.middle, 23)
 
     
     useEffect(() => {
@@ -139,7 +139,18 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
     }
 
     if(!waypoints.first || !waypoints.last || !waypoints.middle){
-        return <View><Text>errro waypoints</Text></View>
+        return (
+            <ErrorLoad actionHandler={() => navigation.goBack()}
+            actionText='Назад'
+            errorText='Помилка при отриманні маршруту'/>
+        )
+    }
+    if(isError){
+        return (
+            <ErrorLoad actionHandler={() => navigation.goBack()}
+            actionText='Назад'
+            errorText='Помилка при даних'/>
+        )
     }
     
 

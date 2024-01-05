@@ -9,6 +9,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import MapView, { LatLng, Marker } from 'react-native-maps'
 import MapViewDirections, { MapViewDirectionsOrigin } from 'react-native-maps-directions'
 import RouteMap from '../components/RouteMap'
+import ErrorLoad from '../components/ErrorLoad'
 type Props = {}
 
 export type waypoint = {id: number, name: string, position: LatLng, type: postionType } 
@@ -51,6 +52,9 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
     const updateMapPoint = (pointLatLng: {latitude: number, longitude: number}, pointId: number) => {
         console.log(pointLatLng, pointId, 'data')
     }
+    useEffect(() => {
+        console.log('error', isError)
+    }, [error])
 
     if(data?.route?.points){
         let res: waypoint[] = (data.route.points.filter(i => i.fullAddress !== null).map((point) => {
@@ -84,20 +88,17 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
     }
     if(isError){
         if('status' in error){
-                return <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                        <Text style={{fontSize: 16, color: '#000', fontWeight: '700'}}>
-                            Помилка при отриманні даних 
-                        </Text>
-                        {/* <Text style={{fontSize: 16, color: '#000', fontWeight: '700'}}>
-                            {JSON.stringify(error)} 
-                        </Text> */}
-                        <TouchableOpacity onPress={() => navigation.goBack()}
-                        style={{marginTop: 10, borderRadius: 12, backgroundColor: '#000', padding: 10}}>
-                            <Text style={{fontSize: 14, color: '#fff'}}>
-                                Назад
-                            </Text>
-                        </TouchableOpacity>
-                </View>
+            return(
+                <ErrorLoad actionHandler={() => navigation.goBack()} 
+                actionText='Назад' 
+                errorText='Помилка при отриманні даних' />
+            )
+        }else{
+            return(
+                <ErrorLoad actionHandler={() => navigation.goBack()} 
+                actionText='Назад' 
+                errorText='Невідома помилка' />
+            )
         }
     }
     if(isLoading){

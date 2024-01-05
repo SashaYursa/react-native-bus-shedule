@@ -8,6 +8,7 @@ import { IBusRoute, ISheduleItem } from '../store/types'
 import RouteLine from '../components/RouteLine'
 import { month } from './BusStations'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import ErrorLoad from '../components/ErrorLoad'
 
 const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackParamList, 'StationShedule'>) => {
 
@@ -147,11 +148,9 @@ const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackP
 
     if(sheduleError){
         return (
-            <View>
-                <Text>
-                    Error fetch data
-                </Text>
-            </View>
+            <ErrorLoad actionHandler={() => navigation.goBack()}
+            actionText='На головну' 
+            errorText='Помилка при завантаженні даних' /> 
         )
     }
     if(sheduleIsLoading){
