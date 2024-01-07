@@ -13,17 +13,23 @@ import ErrorLoad from '../components/ErrorLoad'
 const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackParamList, 'StationShedule'>) => {
 
     const station = route.params.station;
-    const {data: sheduleData, error: sheduleError, isLoading: sheduleIsLoading} = useGetSheduleQuery(station.id)
+    const {data: res, error: sheduleError, isLoading: sheduleIsLoading} = useGetSheduleQuery(station.id)
+    const sheduleData = res?.buses
 
     useEffect(() => {
         console.log(sheduleError, 'error')
     }, [sheduleError])
 
     useEffect(() => {
-        navigation.setOptions({
-            headerTitle: station.stationName
-        })
-    }, [])
+        if(res){
+            const lastUpdateDate = new Date(res.station.last_updated_at)
+            const lastUpdate = lastUpdateDate.getDate() + " " + month[lastUpdateDate.getMonth()] + " " + transformDate(lastUpdateDate.getHours()) + ":" + transformDate(lastUpdateDate.getMinutes())
+            navigation.setOptions({
+                headerTitle: station.stationName,
+                headerRight: () => <View><Text>{lastUpdate}</Text></View>
+            })
+        }
+    }, [res])
     const transformDate = (date: number): string => {
         if(date < 10){
           return '0' + String(date)

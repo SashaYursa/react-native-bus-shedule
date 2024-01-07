@@ -1,6 +1,12 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
-import {IBusRoute, IBusStations, ISheduleItem} from '../types';
+import {
+  IBusRoute,
+  IBusStationShedule,
+  IBusStations,
+  ISheduleItem,
+} from '../types';
 import {Socket, io} from 'socket.io-client';
+import {Platform} from 'react-native';
 
 interface addBusLocation {
   id: number;
@@ -16,7 +22,7 @@ export const stationApi = createApi({
     getStations: build.query<IBusStations[], void>({
       query: () => '/busStations/tablo',
     }),
-    getShedule: build.query<ISheduleItem[], number>({
+    getShedule: build.query<IBusStationShedule, number>({
       query: (id: number) => `/shedule/${id}`,
       async onCacheEntryAdded(
         id,
@@ -24,14 +30,28 @@ export const stationApi = createApi({
       ) {
         await cacheDataLoaded;
         const socket: Socket = io('http://192.168.0.108:3000');
-        //@ts-ignore
-        socket.emit('getShedule', id, res => {
-          console.log('update', res);
-          updateCachedData(draft => res);
+        socket.on('connect', () => {
+          socket.emit(
+            'subscribeToUpdateShedule',
+            socket.id,
+            id,
+            (res: {status: 'ok' | 'error'}) => {
+              if (res.status === 'ok') {
+                console.log('subscribed', res);
+              }
+            },
+          );
         });
+        socket.on('update', (data: any) => {
+          if (data != null) {
+            updateCachedData(draft => data);
+          }
+        });
+
         await cacheEntryRemoved;
         socket.close();
       },
+      keepUnusedDataFor: 5,
     }),
     getRoute: build.query<IBusRoute, number>({
       query: (busId: number) => `/routes/${busId}`,

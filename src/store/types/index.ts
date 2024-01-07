@@ -23,6 +23,10 @@ export interface ISheduleItem {
   ticketsStatus: string;
   updated_At: string;
 }
+export interface IBusStationShedule {
+  buses: ISheduleItem[];
+  station: IBusStations;
+}
 export interface IBusRoute {
   bus: ISheduleItem;
   route: {
