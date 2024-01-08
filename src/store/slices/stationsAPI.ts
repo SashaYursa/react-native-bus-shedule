@@ -37,17 +37,32 @@ export const stationApi = createApi({
             id,
             (res: {status: 'ok' | 'error'}) => {
               if (res.status === 'ok') {
-                console.log('subscribed', res);
               }
             },
           );
         });
+        socket.on('startUpdate', () => {
+          updateCachedData(draft => {
+            return {...draft, isUpdating: true};
+          });
+        });
         socket.on('update', (data: any) => {
           if (data != null) {
-            updateCachedData(draft => data);
+            updateCachedData(() => data);
+          } else {
+            updateCachedData(draft => {
+              return draft.isUpdating ? {...draft, isUpdating: false} : draft;
+            });
           }
         });
-
+        socket.on('error', (data: any) => {
+          if (data?.statusCode === 500) {
+            updateCachedData(draft => {
+              console.log('error');
+              return {...draft, isError: true, isUpdating: true};
+            });
+          }
+        });
         await cacheEntryRemoved;
         socket.close();
       },

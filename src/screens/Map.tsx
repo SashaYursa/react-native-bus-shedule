@@ -28,6 +28,7 @@ type Props = {}
 const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map'>) => {
     const {busId} = route.params
     const {isLoading, error, isError, data: res} = useGetRouteQuery(busId);
+    // console.log(res)
     const [selectedMarker, setSelectedMarker] = useState<number | null>(null)
     const [points, setPoints] = useState<mapPoint[]>([])
     const [currentAddPointId, setCurrentAddPointId] = useState<number | null>(null)
@@ -75,9 +76,12 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
             waypoints = {first, middle: res, last}
         }
     }
-
     //need to rework
-    const wayPointsForMiddleDirection = sliceArrayToConstLength(waypoints?.middle, 23)
+    
+    let wayPointsForMiddleDirection: waypoint[] = []
+    if(waypoints?.middle){
+        wayPointsForMiddleDirection = sliceArrayToConstLength(waypoints?.middle, 23)
+    }
 
     
     useEffect(() => {
@@ -88,7 +92,7 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
                     return {
                         id: point.id, 
                         name: point.station.stationName, 
-                        isMissed: isMissed
+                        isMissed
                     }
                 })
             )
@@ -115,13 +119,15 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
     }
 
     const updateMapPoint = (newPosition: LatLng, pointId: number) => {
-        updateBusPoint({id: pointId, latitude: newPosition.latitude, longitude: newPosition.longitude})
-        setSelectedMarker(null)
+        if(!currentAddPointId){
+            updateBusPoint({id: pointId, latitude: newPosition.latitude, longitude: newPosition.longitude})
+            setSelectedMarker(null)
+        }
     }
     
     const addMapPointAction = (id: number) => {
-        setSelectedMarker(id)
-        setCurrentAddPointId(id)
+            setSelectedMarker(id)
+            setCurrentAddPointId(id)
     }
     
     const createMapPoint = () => {
@@ -133,12 +139,24 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
         setCreateMapPosition(null)
         setSelectedMarker(null)
     }
+    const cancelCreateMapPoint = () => {
+        setCurrentAddPointId(null)
+        setCreateMapPosition(null)
+        setSelectedMarker(null)
+    }
+
     
     const setCreateMapPointRegion = (region: Region) => {
         setCreateMapPosition(region)
     }
 
-    if(!waypoints.first || !waypoints.last || !waypoints.middle){
+    const handleSetSelectedMarker = (marker: number) => {
+        if(!currentAddPointId){
+            setSelectedMarker(marker)
+        }
+    }
+
+    if(!waypoints?.first || !waypoints.last || !waypoints.middle){
         return (
             <ErrorLoad actionHandler={() => navigation.goBack()}
             actionText='Назад'
@@ -158,7 +176,10 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
         <Container>
             {!currentAddPointId
             ? <MapRouteList addMarker={addMapPointAction} moveToMarker={moveToMarker} points={points}/>
-            : <TouchableOpacity style={{position: 'absolute', bottom: 30, left: 10, padding: 10 , zIndex: 10 ,backgroundColor: "green"}} onPress={createMapPoint}><Text style={{textAlign: 'center'}}>create</Text></TouchableOpacity>
+            : <>
+                <TouchableOpacity style={{position: 'absolute', bottom: 30, left: 10, padding: 10 , zIndex: 10, borderRadius: 12 ,backgroundColor: "#0F0F0F"}} onPress={createMapPoint}><Text style={{textAlign: 'center', fontSize: 16, fontWeight: '700', color:'#fff'}}>Зберегти</Text></TouchableOpacity>
+                <TouchableOpacity style={{position: 'absolute', top: 10, right: 10, zIndex: 10}} onPress={cancelCreateMapPoint}><Icon name='close-circle-outline' size={30} color='red'/></TouchableOpacity>
+              </>
             }
             {currentAddPointId !== null &&
                 <View pointerEvents={'none'} style={
@@ -196,7 +217,7 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
                 apikey={Config.GOGLE_MAPS_KEY}
                 strokeColor='hotpink'
                 strokeWidth={3}
-                waypoints={waypoints?.middle?.map(wp => wp.position)} 
+                waypoints={wayPointsForMiddleDirection?.map(wp => wp.position)} 
                 tappable={true}
                 onError={() => {console.log("erorr in map view direction")}}
                 />
@@ -205,7 +226,7 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
                 id={waypoints.first.id}
                 isSelected={selectedMarker === waypoints.first.id}
                 name={waypoints.first.name}
-                setSelectedMarker={setSelectedMarker}
+                setSelectedMarker={handleSetSelectedMarker}
                 savePosition={updateMapPoint}
                 position={waypoints.first.position}
                 icon={require('../assets/bus-station.png')}
@@ -217,7 +238,7 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
                     name={waypoint.name} 
                     position={waypoint.position} 
                     isSelected={selectedMarker === waypoint.id} 
-                    setSelectedMarker={setSelectedMarker} 
+                    setSelectedMarker={handleSetSelectedMarker} 
                     savePosition={updateMapPoint}
                     key={index}
                     icon={require('../assets/pin.png')}
@@ -228,13 +249,12 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
                 id={waypoints.last.id}
                 isSelected={selectedMarker === waypoints.last.id}
                 name={waypoints.last.name}
-                setSelectedMarker={setSelectedMarker}
+                setSelectedMarker={handleSetSelectedMarker}
                 savePosition={updateMapPoint}
                 position={waypoints.last.position}
                 icon={require('../assets/bus-station.png')}
                 />
             </MapView>
-            <TouchableOpacity onPress={createMapPoint}><Text>create</Text></TouchableOpacity>
         </Container>
     )
 }

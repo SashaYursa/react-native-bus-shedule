@@ -26,6 +26,8 @@ export interface ISheduleItem {
 export interface IBusStationShedule {
   buses: ISheduleItem[];
   station: IBusStations;
+  isUpdating: boolean;
+  isError: boolean;
 }
 export interface IBusRoute {
   bus: ISheduleItem;

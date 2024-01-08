@@ -14,8 +14,7 @@ type Props = {
     navigateToMapScreen: () => void
 }
 
-//@ts-ignore
-export const sliceArrayToConstLength = (arr, maxPoints) => {
+export const sliceArrayToConstLength = (arr: waypoint[], maxPoints: number) => {
     let res = [...arr]
     if(res.length === 0){
         return [];
@@ -48,7 +47,10 @@ const RouteMap = ({waypoints, updateMapPoint, navigateToMapScreen}: Props) => {
     if(!waypoints?.last || !waypoints.first){
         return <View><Text>Error</Text></View>
     }
-    let middleWayPointsForDirection = sliceArrayToConstLength(waypoints.middle, 23)
+    let middleWayPointsForDirection: waypoint[] = [];
+    if(waypoints.middle){
+        sliceArrayToConstLength(waypoints.middle, 23)
+    } 
 
     return (
     <MapContainer>
