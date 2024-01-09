@@ -4,19 +4,21 @@ import { createBottomTabNavigator, BottomTabScreenProps } from '@react-navigatio
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import BusStations from '../screens/BusStations'
-import BusSheduleI from '../screens/BusShedule'
+import Search from '../screens/Search'
 import { Text, View } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MDIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+
 import StationShedule from '../screens/StationShedule'
-import { IBusRoute, IBusStations, ISheduleItem } from '../store/types'
-import { useAppDispatch } from '../store';
-import { setInfo } from '../store/slices/netInfo';
+import { IBusStations, ISheduleItem } from '../store/types'
 import Route, { waypoints } from '../screens/Route'
 import Map from '../screens/Map'
+import Info from '../screens/Info'
 type Props = {}
 
 type RootBottomTabsParamList = {
   BusShedule: BottomTabScreenProps<BusStackParamList>
+  Info: BottomTabScreenProps<InfoParamList>
   BusFind: BottomTabScreenProps<BusFindStackParamList>
 }
 
@@ -27,6 +29,8 @@ export type BusStackParamList = {
   Map: {waypoints: waypoints, busId: number}
 };
 export type BusFindStackParamList = {
+};
+export type InfoParamList = {
 };
 
 const BottomTab = createBottomTabNavigator<RootBottomTabsParamList>();
@@ -52,32 +56,29 @@ const BusShedule = () => {
 }
 
 const Navigation: React.FC<Props> = (props: Props) => {
-  const dispatch = useAppDispatch()
   return (
     <NavigationContainer>
       <BottomTab.Navigator>
         <BottomTab.Screen name='BusShedule' component={BusShedule} 
         options={{tabBarIcon: ({focused}) => {
-            return <Icon name="search" size={20} color={focused ? "#5F8670" : "#000"}/>
-        },
-        tabBarLabel: ({focused}) => {
-          return <Text style={{color: focused ? "#5F8670" : "#000"}}>
-            Автостанції
-          </Text>
-        },
-        headerShown: false
-        }}>
-
-        </BottomTab.Screen>
-        <BottomTab.Screen name='BusFind' component={BusSheduleI} options={{
-          tabBarIcon: ({focused}) => {
             return <Icon name="list" size={20} color={focused ? "#5F8670" : "#000"}/>
         },
-        tabBarLabel: ({focused}) => {
-          return <Text style={{color: focused ? "#5F8670" : "#000"}}>
-            Розклад
-          </Text>
-        }
+        tabBarShowLabel: false,
+        headerShown: false
+        }}/>
+        <BottomTab.Screen name='Info' component={Info} 
+        options={{tabBarIcon: ({focused}) => {
+            return <MDIcon name="information-outline" size={25} color={focused ? "#5F8670" : "#000"}/>
+        },
+        tabBarShowLabel: false,
+        headerShown: false
+        }}/>
+        <BottomTab.Screen name='BusFind' component={Search} options={{
+          tabBarIcon: ({focused}) => {
+            return <Icon name="search" size={20} color={focused ? "#5F8670" : "#000"}/>
+        },
+        tabBarShowLabel: false,
+        headerShown: false
         }}/>
       </BottomTab.Navigator>
     </NavigationContainer>

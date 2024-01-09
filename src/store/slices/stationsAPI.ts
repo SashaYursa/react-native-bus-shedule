@@ -72,6 +72,9 @@ export const stationApi = createApi({
       query: (busId: number) => `/routes/${busId}`,
       providesTags: ['route'],
     }),
+    getStationRoutes: build.query<ISheduleItem[], number>({
+      query: (stationId: number) => `/shedule/all/${stationId}`,
+    }),
     addBusStationLocation: build.mutation<string, addBusLocation>({
       query: ({id, ...data}: addBusLocation) => ({
         url: `/busStations/${id}`,
@@ -93,6 +96,8 @@ export const stationApi = createApi({
 
 export const {
   useGetStationsQuery,
+  useLazyGetStationsQuery,
+  useLazyGetStationRoutesQuery,
   useGetSheduleQuery,
   useGetRouteQuery,
   useAddBusStationLocationMutation,
