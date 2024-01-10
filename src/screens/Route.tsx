@@ -19,7 +19,7 @@ export type waypoints = {
     last: waypoint
 } | null
 type postionType = "station_position" | "current_point_position"
-const WEEK_DAYS = [
+export const WEEK_DAYS = [
     'Пн',
     "Вт",
     "Ср",

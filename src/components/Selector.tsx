@@ -11,7 +11,6 @@ type Props = {
     enabled: boolean,
 }   
 const Selector = ({items, title, selectedValue, setSelectedValue, enabled}: Props) => {
-    const [pickerFocused, setPickerFocused] = useState<boolean>(false)
     console.log('rerender selector')
     return (
         <Container style={!enabled ? {backgroundColor: '#707070', borderWidth: 0} : {}}>
@@ -23,12 +22,7 @@ const Selector = ({items, title, selectedValue, setSelectedValue, enabled}: Prop
             dropdownIconColor='#000' 
             selectedValue={selectedValue} 
             onValueChange={setSelectedValue}
-            onFocus={() => (!selectedValue) ? setPickerFocused(true) : {}}
-            onBlur={() => (!selectedValue) ? setPickerFocused(false): {}}
             >
-                { 
-                   !pickerFocused && <Picker.Item label={title}/>
-                }
                 {
                     items.map(item => {
                         return (
@@ -47,7 +41,6 @@ const Container = styled.View`
  border-width: 1px;
  border-radius: 12px;
  overflow: hidden;
- margin: 0 10px;
 `
 
 export default Selector
