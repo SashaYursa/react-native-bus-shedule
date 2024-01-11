@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import styled from 'styled-components/native'
 import { Text } from 'react-native';
-import SearchStations from '../components/SearchStations';
+import SearchByRoute from '../components/SearchByRoute';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { BusFindStackParamList } from '../navigation/Navigation';
 import { ISheduleItem } from '../store/types';
+import SearchByStation from '../components/SearchByStation';
 type Props = {}
 const items = [
   'aasdasda',
@@ -18,7 +19,7 @@ const items = [
   'fsdasda',
 ]
 const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamList, 'SearchScreen'>) => {  
-  const [selectedSearchType, setSelectedSearchType] = useState<'stations' | 'flights'>()  
+  const [selectedSearchType, setSelectedSearchType] = useState<'byStations' | 'byRoute'>()  
   const moveToRoute = (bus: ISheduleItem) => {
     navigation.navigate('Route', {screen: 'BusRoute', params: bus})
   } 
@@ -26,24 +27,24 @@ const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamLis
     <Container>
       <SearchTypes>
         <SearchType 
-        onPress={() => selectedSearchType !== 'stations' ? setSelectedSearchType('stations'): {}} 
-        style={selectedSearchType === 'stations' ? {backgroundColor: '#000'}: {}}>
-          <SearchTypeText style={selectedSearchType === 'stations' ? {color: '#fff'}: {}}>
-            Станції
+        onPress={() => selectedSearchType !== 'byRoute' ? setSelectedSearchType('byRoute'): {}} 
+        style={selectedSearchType === 'byRoute' ? {backgroundColor: '#000'}: {}}>
+          <SearchTypeText style={selectedSearchType === 'byRoute' ? {color: '#fff'}: {}}>
+            По маршрутах
           </SearchTypeText>
         </SearchType>
         <SearchType 
-        onPress={() => selectedSearchType !== 'flights' ? setSelectedSearchType('flights'): {}} 
-        style={selectedSearchType === 'flights' ? {backgroundColor: '#000'}: {}}>
-          <SearchTypeText style={selectedSearchType === 'flights' ? {color: '#fff'}: {}}>
-            Рейси
+        onPress={() => selectedSearchType !== 'byStations' ? setSelectedSearchType('byStations'): {}} 
+        style={selectedSearchType === 'byStations' ? {backgroundColor: '#000'}: {}}>
+          <SearchTypeText style={selectedSearchType === 'byStations' ? {color: '#fff'}: {}}>
+            По станціях
           </SearchTypeText>
         </SearchType>
       </SearchTypes>
       <Main>
-        {selectedSearchType === 'stations' 
-        ? <SearchStations moveToRouteScreen={moveToRoute}/>
-        : <Text>Not stations</Text>
+        {selectedSearchType === 'byRoute' 
+        ? <SearchByRoute moveToRouteScreen={moveToRoute}/>
+        : <SearchByStation moveToRouteScreen={moveToRoute} />
         }
       </Main>
     </Container>

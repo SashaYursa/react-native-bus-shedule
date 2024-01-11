@@ -90,21 +90,21 @@ const Navigation: React.FC<Props> = (props: Props) => {
       <BottomTab.Navigator>
         <BottomTab.Screen name='BusShedule' component={BusSheduleNavigation} 
         options={{tabBarIcon: ({focused}) => {
-            return <Icon name="list" size={20} color={focused ? "#5F8670" : "#000"}/>
+            return <Icon name="list" size={20} color={focused ? "#41b874" : "#000"}/>
         },
         tabBarShowLabel: false,
         headerShown: false
         }}/>
         <BottomTab.Screen name='Info' component={Info} 
         options={{tabBarIcon: ({focused}) => {
-            return <MDIcon name="information-outline" size={25} color={focused ? "#5F8670" : "#000"}/>
+            return <MDIcon name="information-outline" size={25} color={focused ? "#41b874" : "#000"}/>
         },
         tabBarShowLabel: false,
         headerShown: false
         }}/>
         <BottomTab.Screen name='Search' component={SearchNavigation} options={{
           tabBarIcon: ({focused}) => {
-            return <Icon name="search" size={20} color={focused ? "#5F8670" : "#000"}/>
+            return <Icon name="search" size={20} color={focused ? "#41b874" : "#000"}/>
         },
         tabBarShowLabel: false,
         headerShown: false

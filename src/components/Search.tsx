@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
+import { Text, View } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import styled from 'styled-components/native'
 
@@ -18,7 +19,7 @@ const Search: React.FC<Props> = ({updateFilter}: Props) => {
 
     return (
         <SearchBar>
-            <SearchInput value={value} onChangeText={setValue}/>
+            <SearchInput placeholder="Пошук" value={value} onChangeText={setValue}/>
             { value && 
               <ClearInputValue onPress={clearInput}>
                 <Icon size={20} name="backspace"/>
