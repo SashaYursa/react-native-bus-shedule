@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components/native'
-import {Picker} from '@react-native-picker/picker';
-import Selector from '../components/Selector';
-import { useLazyGetStationsQuery } from '../store/slices/stationsAPI';
 import { Text } from 'react-native';
 import SearchStations from '../components/SearchStations';
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { BusFindStackParamList } from '../navigation/Navigation';
+import { ISheduleItem } from '../store/types';
 type Props = {}
 const items = [
   'aasdasda',
@@ -17,8 +17,11 @@ const items = [
   'sfdfasda',
   'fsdasda',
 ]
-const Search: React.FC<Props> = (props: Props) => {  
+const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamList, 'SearchScreen'>) => {  
   const [selectedSearchType, setSelectedSearchType] = useState<'stations' | 'flights'>()  
+  const moveToRoute = (bus: ISheduleItem) => {
+    navigation.navigate('Route', {screen: 'BusRoute', params: bus})
+  } 
   return (
     <Container>
       <SearchTypes>
@@ -39,7 +42,7 @@ const Search: React.FC<Props> = (props: Props) => {
       </SearchTypes>
       <Main>
         {selectedSearchType === 'stations' 
-        ? <SearchStations/>
+        ? <SearchStations moveToRouteScreen={moveToRoute}/>
         : <Text>Not stations</Text>
         }
       </Main>

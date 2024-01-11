@@ -5,26 +5,11 @@ import styled from 'styled-components/native'
 import { IBusStations } from '../store/types'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Search from '../components/Search'
-import { } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { BusStackParamList } from '../navigation/Navigation'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useNetInfo } from '@react-native-community/netinfo'
+import { formattingDate } from '../utils/helpers'
 
-export const month = [
-  'січня',
-  'лютого',
-  'березня',
-  'квітня',
-  'травня',
-  'червня',
-  'липня',
-  'серпня',
-  'вересня',
-  'жовтня',
-  'листопада',
-  'грудня',
-]
 
 const BusStations = ({navigation, route}: NativeStackScreenProps<BusStackParamList, 'BusStations'>) => {
   const netInfo = useNetInfo()
@@ -59,7 +44,7 @@ const BusStations = ({navigation, route}: NativeStackScreenProps<BusStackParamLi
 
   const busStation = (station: IBusStations) => {
     const lastUpdateDate = new Date(station.last_updated_at)
-    const lastUpdate = lastUpdateDate.getDate() + " " + month[lastUpdateDate.getMonth()] + " " + transformDate(lastUpdateDate.getHours()) + ":" + transformDate(lastUpdateDate.getMinutes())
+    const lastUpdate = formattingDate(lastUpdateDate)
     return (
       <BusStationButton onPress={() => {moveToStationShedule(station)}}>
         <BusStationIcon>

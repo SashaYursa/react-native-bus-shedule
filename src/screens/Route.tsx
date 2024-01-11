@@ -1,16 +1,14 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import React, { useCallback, useEffect, useLayoutEffect } from 'react'
-import { ActivityIndicator, Button, Text, Vibration, View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
-import { BusStackParamList } from '../navigation/Navigation'
+import React, { useEffect, useLayoutEffect } from 'react'
+import { ActivityIndicator, Text, View, StyleSheet } from 'react-native'
+import { BusStackParamList, RouteStackParamList } from '../navigation/Navigation'
 import { useGetRouteQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
-import { month } from './BusStations'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import MapView, { LatLng, Marker } from 'react-native-maps'
-import MapViewDirections, { MapViewDirectionsOrigin } from 'react-native-maps-directions'
+import { LatLng } from 'react-native-maps'
 import RouteMap from '../components/RouteMap'
 import ErrorLoad from '../components/ErrorLoad'
-type Props = {}
+import { MONTH, SHORT_WEEK_DAYS } from '../utils/constants'
 
 export type waypoint = {id: number, name: string, position: LatLng, type: postionType } 
 export type waypoints = {
@@ -19,36 +17,22 @@ export type waypoints = {
     last: waypoint
 } | null
 type postionType = "station_position" | "current_point_position"
-export const WEEK_DAYS = [
-    'Пн',
-    "Вт",
-    "Ср",
-    "Чт",
-    "Пт",
-    "Сб", 
-    "Нд"
-]
 
-const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'BusRoute'>) => {
-    const {id} = route.params
+
+const Route = ({route, navigation}: NativeStackScreenProps<RouteStackParamList, 'BusRoute'>) => {
+    const {id, busRoute} = route?.params
     const {isLoading, error, isError, data} = useGetRouteQuery(Number(id));
 
-    useLayoutEffect(() => {
-        if(data) {
-            navigation.setOptions({
-                headerTitleStyle: {
-                    fontSize: 14
-                },
-                title: data.bus.busRoute
-            })
-        }
-    }, [data])
+    useEffect(() => {
+        navigation.setOptions({
+            headerTitleStyle: {
+                fontSize: 14
+            },
+            title: busRoute
+        })
+    }, [])
 
     let waypoints: waypoints = null
-
-    // data?.route?.points.forEach(point => {
-    //     console.log(point.id, '+', point.station.stationName)
-    // })
     const updateMapPoint = (pointLatLng: {latitude: number, longitude: number}, pointId: number) => {
         console.log(pointLatLng, pointId, 'data')
     }
@@ -146,7 +130,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                 </Text>
             </View>
             <WeekContainer>
-                {WEEK_DAYS.map(dayName => {
+                {SHORT_WEEK_DAYS.map(dayName => {
                     return (
                         <WeekDay key={dayName}>
                             <DayText style={{fontWeight: '700'}}>
@@ -163,7 +147,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'B
                             {week.map((dayItem, index) => {
                                 if(dayItem){
                                     const splitted = dayItem.split('-');
-                                    const day = splitted[0] + " " + month[(Number(splitted[1]) - 1)]?.substring(0, 3)
+                                    const day = splitted[0] + " " + MONTH[(Number(splitted[1]) - 1)]?.substring(0, 3)
                                     return <WeekDay key={index} style={{backgroundColor: 'rgba(19, 191, 0, 0.7)'}}><DayText>{day}</DayText></WeekDay>
                                 }
                                 return <WeekDay key={index} style={{backgroundColor: 'rgba(134, 134, 134, 0.6)'}}><DayText>-</DayText></WeekDay>

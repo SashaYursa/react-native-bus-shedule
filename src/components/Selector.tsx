@@ -23,6 +23,7 @@ const Selector = ({items, title, selectedValue, setSelectedValue, enabled}: Prop
             selectedValue={selectedValue} 
             onValueChange={setSelectedValue}
             >
+                <Picker.Item label={title} enabled={false} value={undefined}/>
                 {
                     items.map(item => {
                         return (

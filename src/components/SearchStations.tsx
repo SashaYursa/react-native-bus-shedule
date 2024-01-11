@@ -1,25 +1,26 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Selector from './Selector'
 import { useLazyGetStationRoutesQuery, useLazyGetStationsQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { ISheduleItem } from '../store/types'
-import { WEEK_DAYS } from '../screens/Route'
+import BusRouteCard from './BusRouteCard'
+type Props = {
+  moveToRouteScreen: (route: ISheduleItem) => void
+}
 
-type Props = {}
-
-const SearchStations = (props: Props) => {
+const SearchStations = ({moveToRouteScreen}: Props) => {
   const [selectedStation, setSelectedStation] = useState<number>() 
   const [selectedRoute, setSelectedRoute] = useState<ISheduleItem>() 
-  const [getStation, {data: stations, isError: stationsHasError, isLoading: stationsIsLoading}] = useLazyGetStationsQuery()
+  const [getStations, {data: stations, isError: stationsHasError, isLoading: stationsIsLoading}] = useLazyGetStationsQuery()
   const [getRoutes, {data: routes, isError: routesHasError, isLoading: routesIsLoading}] = useLazyGetStationRoutesQuery()
   const [stationsForSelect, setStationsForSelect] = useState<{title: string, value: string}[]>([])
   const [routesForSelect, setRoutesForSelect] = useState<{title: string, value: string}[]>([])
   const [searchType, setSearchType] =  useState<'list' | 'input'>('list')
   useEffect(() => {
     if(!stations){
-      getStation()
+      getStations()
     }
   }, [])
 
@@ -50,15 +51,27 @@ const SearchStations = (props: Props) => {
         </View>
     )
   }
+  const _renderItem = (item: ISheduleItem) => {
+    const findStation = stations?.find(s => s.id === selectedStation)
+    if(findStation){
+      return (
+        <RouteButton onPress={() => moveToRouteScreen(item)}>
+          <BusRouteCard station={findStation} sheduleItem={item}/>
+        </RouteButton>
+      )
+    }
+    return <><Text>
+      Error</Text></>
+  }
 
   return (
-	<>
+	<View style={{flex: 1}}>
   <SelectorHeader>Станція</SelectorHeader>
 	<SelectorContainer>
 		<Selector enabled={true} 
 		selectedValue={selectedStation ? String(selectedStation) : undefined} 
 		setSelectedValue={(id) => setSelectedStation(Number(id))} 
-		items={stationsForSelect} 
+		items={stationsForSelect}
 		title='Станція'/>
 	</SelectorContainer>
   <SelectorHeader>Маршрут</SelectorHeader>
@@ -82,34 +95,20 @@ const SearchStations = (props: Props) => {
         </TouchableOpacity>
       </SearchInputContainer>
     }
-  <View>
-      <ChangeSearchModeButton onPress={() => setSearchType(type => type === 'input' ? 'list' : 'input')}>
-        <Icon name={searchType === 'list' ? 'magnify' : 'form-dropdown'} color='#000' size={25}/>
-      </ChangeSearchModeButton>
+    <View>
+        <ChangeSearchModeButton onPress={() => setSearchType(type => type === 'input' ? 'list' : 'input')}>
+          <Icon name={searchType === 'list' ? 'magnify' : 'form-dropdown'} color='#000' size={25}/>
+        </ChangeSearchModeButton>
+      </View>
     </View>
-  </View>
-  <ContentContainer>
-    { selectedRoute &&
-      routes?.map(route => {
-        if(route.busRoute === selectedRoute.busRoute){
-          return (
-          <View style={{flexDirection: 'row'}}>
-            <Text>
-              {route.busRoute}
-            </Text>
-            <Text>
-              {`${new Date(Number(route.departure)).getHours()}:${new Date(Number(route.departure)).getMinutes()}`}
-            </Text>
-            <Text>
-              {route.id}
-            </Text>
-          </View>
-        )
-      }
-      })
-    }
-  </ContentContainer>
-	</>
+    <FlatList contentContainerStyle={{
+        padding: 5,
+    }} 
+    style={{marginTop: 5}}
+    data={routes?.filter(route => route.busRoute === selectedRoute?.busRoute)}
+    renderItem={({item}) => _renderItem(item)}
+    />
+	</View>
   )
 }
 
@@ -145,9 +144,12 @@ flex-grow: 1;
 background-color: #fff;
 `
 
-const ContentContainer = styled.ScrollView`
-  flex-grow: 1; 
-  margin-top: 10px;
+const RouteButton = styled.TouchableOpacity`
+    padding: 10px;
+    border-radius: 12px;
+    background-color: rgba(127, 17, 224, .2);
+    overflow: hidden;
+    margin-bottom: 5px;
 `
 
 export default SearchStations
