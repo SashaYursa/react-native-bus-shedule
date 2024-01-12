@@ -1,54 +1,57 @@
 import React, { useEffect, useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 import { IBusStations, ISheduleItem } from '../store/types'
 import Search from './Search'
 import SearchField from './SearchField'
 import styled from 'styled-components/native'
 import { useLazyGetAllStationsQuery } from '../store/slices/stationsAPI'
+import SearchFieldWithDropdown from './SearchFieldWithDropdown'
 
 type Props = {
     moveToRouteScreen: (route: ISheduleItem) => void
 }
 
 const SearchByStation = ({moveToRouteScreen}: Props) => {
-    const [searchStation, setSearchStation] = useState<{value: string | undefined, type: 'input' | undefined}>({value: undefined, type: undefined})
-    const [getAllStations, {data: stations, isLoading, error}] = useLazyGetAllStationsQuery()
+    const [getAllStations, {data: stations, isLoading: stationsIsLoading, error: stationsError}] = useLazyGetAllStationsQuery()
     const [allStationsForSearch, setAllStationsForSearch] = useState<{title: string, value: string}[]>([])
     const [searchedValue, setSearchedValue] = useState<{title: string}[]>([])
+    const [selectedFromStation, setSelectedFromStation] = useState<IBusStations>()
     useEffect(() => {
         getAllStations()
     }, [])
 
     useEffect(() => {
-        if(searchStation.type === 'input' && typeof searchStation.value  === 'string'){
-            const searchedValue = searchStation.value.toUpperCase()
-            setSearchedValue(allStationsForSearch.filter(station => station.title.toUpperCase().includes(searchedValue)))
-        }
-    }, [searchStation])
+        console.log(selectedFromStation)
+    }, [selectedFromStation])
 
-    useEffect(() => {
-        if(stations){
-            setAllStationsForSearch(stations.map(station => ({title: station.stationName, value: String(station.id)})))
-        }
-    }, [stations])
+    // useEffect(() => {
+    //     if(stations){
+    //         setAllStationsForSearch(stations.map(station => ({title: station.stationName, value: String(station.id)})))
+    //     }
+    // }, [stations])
+    if(stationsError || !stations){
+        return <View>
+            <Text>
+                Error load stations
+            </Text>
+        </View>
+    }
+
+    if(stationsIsLoading){
+        return <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <ActivityIndicator size='large'/>
+        </View>
+    }
+
     return (
     <Container>
         <SearchFieldContainer>
-            <SearchField enabled={true} itemsForSearch={allStationsForSearch} selectedValue={searchStation.value} setSelectedValue={(value, type) => setSearchStation({value, type})} title='Звідки'/>
+            <SearchFieldWithDropdown title='Звідки'
+            setSearchedVale={(value) => setSelectedFromStation(stations.find(station => station.stationName === value))}
+            itemsForSearch={stations.map(station => (station.stationName))}/>
         </SearchFieldContainer>
-        { (searchedValue.length > 0 && searchStation.type) && 
-            <SearchedValuesContainer>
-                    <ScrollView>
-                        {
-                            searchedValue.map(st => {
-                                return <SearchedValue key={st.title}><SearchedValueText>{st.title}</SearchedValueText></SearchedValue>
-                            })
-                        }
-                    </ScrollView>
-            </SearchedValuesContainer>
-        }
         <SearchFieldContainer>
-            {/* <SearchField enabled={true} itemsForSearch={[]} selectedValue={searchStation.value} setSelectedValue={setSearchStation} title='Куди'/> */}
+            <SearchFieldWithDropdown itemsForSearch={stations.map(station => (station.stationName))} setSearchedVale={() => {}} title='Куди'/>
         </SearchFieldContainer>
     </Container>
   )
@@ -61,26 +64,5 @@ flex-grow: 1;
 const SearchFieldContainer = styled.View`
 padding: 5px;
 `
-
-const SearchedValuesContainer = styled.View`
-    height: 30%;
-    padding: 5px;
-    background-color: #fff;
-    margin: 0 5px;
-`
-const SearchedValue = styled.TouchableOpacity`
-    background-color: green;
-    padding: 10px 5px;
-    border-radius: 12px;
-    margin-bottom: 5px;
-`
-
-const SearchedValueText = styled.Text`
-    font-size: 14px;
-    color: #fff
-`
-
-
-
 
 export default SearchByStation

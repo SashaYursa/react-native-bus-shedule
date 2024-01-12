@@ -17,7 +17,7 @@ const SearchField = ({enabled, itemsForSearch, setSelectedValue, selectedValue, 
     const [searchValue, setSearchValue] = useState<string>('')
 
     useEffect(() => {
-        if(searchValue && searchType === 'input'){
+        if(searchType === 'input'){
             const timeout = setTimeout(() => {
                 setSelectedValue(searchValue.toUpperCase(), 'input')
             }, 100);
@@ -35,17 +35,17 @@ const SearchField = ({enabled, itemsForSearch, setSelectedValue, selectedValue, 
             title={title}/>
         </SelectorContainer>
         : <SearchInputContainer>
-            <SearchRouteInput value={searchValue} onChangeText={setSearchValue}/>
+            <SearchRouteInput value={searchValue} placeholder='Введіть назву' onChangeText={setSearchValue}/>
         </SearchInputContainer>
         }
         <View>
-            <ChangeSearchModeButton onPress={() => setSearchType(type => {
-                if(type === 'input') {
-                    setSearchValue('')
+            <ChangeSearchModeButton onPress={() => {
+                if(searchType === 'input') {
                     setSelectedValue('', undefined)
                 }
-                return type === 'input' ? 'list' : 'input'
-                })}>
+                setSearchValue('')
+                setSearchType(type => type === 'input' ? 'list' : 'input')
+                }}>
                 <Icon name={searchType === 'list' ? 'magnify' : 'form-dropdown'} color='#000' size={25}/>
             </ChangeSearchModeButton>
         </View>
