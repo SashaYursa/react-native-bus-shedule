@@ -20,7 +20,7 @@ const SearchField = ({enabled, itemsForSearch, setSelectedValue, selectedValue, 
         if(searchType === 'input'){
             const timeout = setTimeout(() => {
                 setSelectedValue(searchValue.toUpperCase(), 'input')
-            }, 100);
+            }, 200);
             return () => {clearTimeout(timeout)}
         }
     }, [searchValue])
@@ -39,15 +39,20 @@ const SearchField = ({enabled, itemsForSearch, setSelectedValue, selectedValue, 
         </SearchInputContainer>
         }
         <View>
-            <ChangeSearchModeButton onPress={() => {
+        { enabled 
+        ?    <ChangeSearchModeButton onPress={() => {
                 if(searchType === 'input') {
                     setSelectedValue('', undefined)
                 }
                 setSearchValue('')
                 setSearchType(type => type === 'input' ? 'list' : 'input')
-                }}>
+            }}>
                 <Icon name={searchType === 'list' ? 'magnify' : 'form-dropdown'} color='#000' size={25}/>
             </ChangeSearchModeButton>
+        : <ChangeSearchModeButton onPress={() => setSelectedValue('', undefined)}>
+                <Icon name='close' color='#000' size={25}/>
+        </ChangeSearchModeButton>
+        }
         </View>
         </Container>
     )

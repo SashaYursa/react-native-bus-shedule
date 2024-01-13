@@ -25,6 +25,9 @@ export const stationApi = createApi({
     getAllStations: build.query<IBusStations[], void>({
       query: () => '/busStations',
     }),
+    getAttachedStations: build.query<IBusStations[], number>({
+      query: (stationId: number) => `/busStations/attached/${stationId}`,
+    }),
     getShedule: build.query<IBusStationShedule, number>({
       query: (id: number) => `/shedule/${id}`,
       async onCacheEntryAdded(
@@ -102,6 +105,7 @@ export const {
   useLazyGetStationsQuery,
   useLazyGetAllStationsQuery,
   useLazyGetStationRoutesQuery,
+  useLazyGetAttachedStationsQuery,
   useGetSheduleQuery,
   useGetRouteQuery,
   useAddBusStationLocationMutation,
