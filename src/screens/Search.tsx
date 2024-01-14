@@ -4,25 +4,43 @@ import { Text } from 'react-native';
 import SearchByRoute from '../components/SearchByRoute';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { BusFindStackParamList } from '../navigation/Navigation';
-import { ISheduleItem } from '../store/types';
+import { IBusStations, ISheduleItem } from '../store/types';
 import SearchByStation from '../components/SearchByStation';
-type Props = {}
-const items = [
-  'aasdasda',
-  'aasdasd21',
-  'aasd123a',
-  'fasdfsddasda',
-  '1231da',
-  'asfksldasda',
-  'fsdfa',
-  'sfdfasda',
-  'fsdasda',
-]
+import { FlashList } from '@shopify/flash-list';
+import { useGetAllStationsQuery } from '../store/slices/stationsAPI';
+import Loading from '../components/Loading';
+import ErrorLoad from '../components/ErrorLoad';
+import BusRouteCard from '../components/BusRouteCard';
+let i = 0;
 const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamList, 'SearchScreen'>) => {  
-  const [selectedSearchType, setSelectedSearchType] = useState<'byStations' | 'byRoute'>()  
+  console.log('rerender', i)
+  const {data: allStations, isLoading: stationsIsLoading, error: stationsError} = useGetAllStationsQuery()
+  
+  const [selectedSearchType, setSelectedSearchType] = useState<'byStations' | 'byRoute'>('byRoute')  
+  const [resultData, setResultData] = useState<{sheduleItem: ISheduleItem, station: IBusStations}[]>()
+
+  const _renderItem = (item: {sheduleItem: ISheduleItem, station: IBusStations}) => {
+    return (
+      <RouteButton onPress={() => moveToRoute(item.sheduleItem)}>
+        <BusRouteCard station={item.station} sheduleItem={item.sheduleItem}/>
+      </RouteButton>
+    )
+  }
+  
   const moveToRoute = (bus: ISheduleItem) => {
     navigation.navigate('Route', {screen: 'BusRoute', params: bus})
   } 
+  
+  if(stationsIsLoading){
+    return <Loading/>
+  }
+  if(!allStations){
+    return <ErrorLoad actionHandler={() => navigation.goBack()} 
+    actionText='На головну' 
+    errorText='Помилка при завантаженні станці'/>
+  }
+
+
   return (
     <Container>
       <SearchTypes>
@@ -43,10 +61,21 @@ const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamLis
       </SearchTypes>
       <Main>
         {selectedSearchType === 'byRoute' 
-        ? <SearchByRoute moveToRouteScreen={moveToRoute}/>
-        : <SearchByStation moveToRouteScreen={moveToRoute} />
+        ? <SearchByRoute allStations={allStations.filter(station => !!station.linkToSheduleBoard)} 
+          setResultsData={setResultData}/>
+        : <SearchByStation allStations={allStations} 
+          setResultsData={setResultData}/>
         }
       </Main>
+      <ResultContainer>
+      <FlashList contentContainerStyle={{
+        padding: 5,
+      }} 
+      data={resultData}
+      estimatedItemSize={160}
+      renderItem={({item}) => _renderItem(item)}
+      />
+      </ResultContainer>
     </Container>
   )
 }
@@ -54,7 +83,6 @@ const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamLis
 const Container = styled.View`
   flex-grow: 1;
 `
-
 const SearchTypes = styled.View`
   flex-direction: row;
   margin-top: 5px;
@@ -76,10 +104,18 @@ const SearchTypeText = styled.Text`
   text-align: center;
   color: #000;
 `
-
 const Main = styled.View`
-  flex-grow: 1;
-  flex-shrink: 1;
+`
+const ResultContainer = styled.View`
+flex-grow: 1;
+margin-top: 5px;
+`
+const RouteButton = styled.TouchableOpacity`
+padding: 10px;
+border-radius: 12px;
+background-color: rgba(127, 17, 224, .2);
+overflow: hidden;
+margin-bottom: 5px;
 `
 
 

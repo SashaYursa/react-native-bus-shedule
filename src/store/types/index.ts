@@ -37,19 +37,19 @@ export interface IBusRoute {
       dates: [[string | null]];
       last_updated_at: string | null;
     };
-    points: [
-      {
-        id: number;
-        departureTime: string | null;
-        arrivalTime: string | null;
-        kilometresFromStation: number | null;
-        cost: number | null;
-        fullAddress: string | null;
-        latitude: number | null;
-        longitude: number | null;
-        last_updated_at: string;
-        station: IBusStations;
-      },
-    ];
+    points: point[];
   } | null;
 }
+
+export type point = {
+  id: number;
+  departureTime: string | null;
+  arrivalTime: string | null;
+  kilometresFromStation: number | null;
+  cost: number | null;
+  fullAddress: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  last_updated_at: string;
+  station: IBusStations;
+};

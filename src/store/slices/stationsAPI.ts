@@ -78,6 +78,18 @@ export const stationApi = createApi({
       query: (busId: number) => `/routes/${busId}`,
       providesTags: ['route'],
     }),
+    getRouteByPoints: build.query<
+      ISheduleItem[],
+      {fromPoint: number; toPoint: number}
+    >({
+      query: ({fromPoint, toPoint}) => ({
+        url: '/shedule/byPoints',
+        params: {
+          firstPoint: fromPoint,
+          secondPoint: toPoint,
+        },
+      }),
+    }),
     getStationRoutes: build.query<ISheduleItem[], number>({
       query: (stationId: number) => `/shedule/all/${stationId}`,
     }),
@@ -103,9 +115,10 @@ export const stationApi = createApi({
 export const {
   useGetStationsQuery,
   useLazyGetStationsQuery,
-  useLazyGetAllStationsQuery,
+  useGetAllStationsQuery,
   useLazyGetStationRoutesQuery,
   useLazyGetAttachedStationsQuery,
+  useLazyGetRouteByPointsQuery,
   useGetSheduleQuery,
   useGetRouteQuery,
   useAddBusStationLocationMutation,

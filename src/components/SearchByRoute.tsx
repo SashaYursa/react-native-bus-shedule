@@ -3,41 +3,35 @@ import React, { useEffect, useState } from 'react'
 import Selector from './Selector'
 import { useLazyGetStationRoutesQuery, useLazyGetStationsQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
-import { ISheduleItem } from '../store/types'
+import { IBusStations, ISheduleItem } from '../store/types'
 import BusRouteCard from './BusRouteCard'
 import SearchField from './SearchField'
 type Props = {
-  moveToRouteScreen: (route: ISheduleItem) => void
+  setResultsData: (data: {sheduleItem: ISheduleItem, station: IBusStations}[]) => void
+  allStations: IBusStations[]
 }
 
-const SearchByRoute = ({moveToRouteScreen}: Props) => {
-  const [selectedStation, setSelectedStation] = useState<number>() 
+const SearchByRoute = ({setResultsData, allStations}: Props) => {
+  const [selectedStation, setSelectedStation] = useState<IBusStations>() 
   const [selectedRoute, setSelectedRoute] = useState<string>() 
-  const [getStations, {data: stations, isError: stationsHasError, isLoading: stationsIsLoading}] = useLazyGetStationsQuery()
   const [getRoutes, {data: routes, isError: routesHasError, isLoading: routesIsLoading}] = useLazyGetStationRoutesQuery()
   const [stationsForSelect, setStationsForSelect] = useState<{title: string, value: string}[]>([])
   const [routesForSelect, setRoutesForSelect] = useState<{title: string, value: string}[]>([])
   const [selectedRoutes, setSelectedRoutes] = useState<null | ISheduleItem[]>(null)
   useEffect(() => {
-    if(!stations){
-      getStations()
-    }
-  }, [])
-
-  useEffect(() => {
     if(selectedRoute){
       const filteredRoutes = routes?.filter(route => route.busRoute.toUpperCase().includes(selectedRoute))
-      if(filteredRoutes){
-        setSelectedRoutes(filteredRoutes)
+      if(filteredRoutes && selectedStation){
+        setResultsData(filteredRoutes.map(route => ({sheduleItem: route, station: selectedStation})))
       }
     }
   }, [selectedRoute])
 
   useEffect(() => {
-    if(stations){
-      setStationsForSelect(stations?.map(station => ({title: station.stationName, value: String(station.id)})))
+    if(allStations){
+      setStationsForSelect(allStations?.map(station => ({title: station.stationName, value: String(station.id)})))
     }
-  }, [stations])
+  }, [allStations])
 
   useEffect(() => {
     if(routes){
@@ -48,7 +42,9 @@ const SearchByRoute = ({moveToRouteScreen}: Props) => {
   }, [routes])
 
   useEffect(() => {
-    getRoutes(Number(selectedStation))
+    if(selectedStation){
+      getRoutes(selectedStation?.id)
+    }
   }, [selectedStation])
   
   if(!stationsForSelect){
@@ -60,34 +56,19 @@ const SearchByRoute = ({moveToRouteScreen}: Props) => {
       </View>
     )
   }
-  const _renderItem = (item: ISheduleItem) => {
-    const findStation = stations?.find(s => s.id === selectedStation)
-    if(findStation){
-      return (
-        <RouteButton onPress={() => moveToRouteScreen(item)}>
-          <BusRouteCard station={findStation} sheduleItem={item}/>
-        </RouteButton>
-      )
-    }
-    return <>
-      <Text>
-        Error
-      </Text>
-    </>
-  }
-  if(routesIsLoading || stationsIsLoading){
+  if(routesIsLoading){
     return <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
         <ActivityIndicator size='large'/>
       </View>
   }
 
   return (
-	<View style={{flex: 1}}>
+	<Container>
     <SelectorHeader>Станція</SelectorHeader>
     <SelectorContainer>
       <Selector enabled={true} 
-        selectedValue={selectedStation ? String(selectedStation) : undefined} 
-        setSelectedValue={(id) => setSelectedStation(Number(id))} 
+        selectedValue={selectedStation ? String(selectedStation.id) : undefined} 
+        setSelectedValue={(id) => setSelectedStation(allStations.find(station => station.id === Number(id)))} 
         items={stationsForSelect}
         title='Станція'/>
     </SelectorContainer>
@@ -101,16 +82,13 @@ const SearchByRoute = ({moveToRouteScreen}: Props) => {
         setSelectedRoute(value)
       }}/>
     </SelectorContainer>
-    <FlatList contentContainerStyle={{
-        padding: 5,
-      }} 
-      style={{marginTop: 5}}
-      data={selectedRoutes}
-      renderItem={({item}) => _renderItem(item)}
-      />
-	</View>
+	</Container>
   )
 }
+
+const Container = styled.View`
+flex-grow: 1;
+`
 
 const SelectorContainer = styled.View`
 padding: 0 5px;
@@ -121,13 +99,6 @@ font-weight: 700;
 color: #000;
 text-align: center;
 margin: 5px 0;
-`
-const RouteButton = styled.TouchableOpacity`
-padding: 10px;
-border-radius: 12px;
-background-color: rgba(127, 17, 224, .2);
-overflow: hidden;
-margin-bottom: 5px;
 `
 
 

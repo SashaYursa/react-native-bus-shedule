@@ -11,7 +11,6 @@ type Props = {
 }
 
 const SearchFieldWithDropdown = ({itemsForSearch, title, setSearchedVale}: Props) => {
-    console.log('rerender')
     const [searchItem, setSearchItem] = useState<{value: string | undefined, type: 'input' | undefined}>({value: undefined, type: undefined})
     const [valuesForSearchList, setValuesForSearchList] = useState<string[]>([])
     const [expanded, setExpanded] = useState(false)

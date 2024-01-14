@@ -11,7 +11,6 @@ type Props = {
     enabled: boolean,
 }   
 const Selector = ({items, title, selectedValue, setSelectedValue, enabled}: Props) => {
-    // console.log('rerender selector')
     return (
         <Container style={!enabled ? {backgroundColor: '#707070', borderWidth: 0} : {}}>
             <Picker 
