@@ -26,6 +26,7 @@ const SearchFieldWithDropdown = ({itemsForSearch, title, setSearchedVale}: Props
             const searchedValue = searchItem.value.toUpperCase()
             setValuesForSearchList(itemsForSearch.filter(item => item.toUpperCase().includes(searchedValue)))
             if(searchItem.value.length > 0){
+                console.log('set Expanded true')
                 setExpanded(true)
             }
             else{
@@ -36,6 +37,7 @@ const SearchFieldWithDropdown = ({itemsForSearch, title, setSearchedVale}: Props
             setSearchedVale(searchItem.value)
             setExpanded(false)
         }
+        return () => {setExpanded(false)}
     }, [searchItem])
     useEffect(() => {
         if(expanded){
@@ -65,7 +67,8 @@ const SearchFieldWithDropdown = ({itemsForSearch, title, setSearchedVale}: Props
         />
         <Animated.View style={[style.expandView, {opacity: opacityValue, minHeight: animHeightRef}]}>
             { (valuesForSearchList.length > 0 && searchItem.type && canShowList) && 
-                <FlashList showsVerticalScrollIndicator={false} contentContainerStyle={{paddingTop: 5}}
+                <FlashList showsVerticalScrollIndicator={false} 
+                contentContainerStyle={{ paddingTop: 5 }}
                 estimatedItemSize={30}
                 data={valuesForSearchList}
                 renderItem={({item}) => <SearchedValueButton onPress={() => {setSearchedVale(item)}}>
@@ -90,7 +93,6 @@ const style = StyleSheet.create({
         height: 200,
         top: 5,
         width: '100%',
-        borderStartColor: '#7e197eaaea',
         borderWidth: 1,
         borderRadius: 12,
         overflow: 'hidden',

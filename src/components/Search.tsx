@@ -31,12 +31,12 @@ const Search: React.FC<Props> = ({updateFilter}: Props) => {
 
 const SearchBar = styled.View`
   flex-direction: row;
-  gap: 10px;
-  background-color: #fff;
   width: 100%;
   align-items: center;
   justify-content: space-between;
   padding: 5px;
+  height: 60px;
+  background-color: #fff;
 `
 const SearchInput = styled.TextInput`
   padding: 10px;

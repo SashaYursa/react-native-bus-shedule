@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components/native'
-import { Text } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import SearchByRoute from '../components/SearchByRoute';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { BusFindStackParamList } from '../navigation/Navigation';
@@ -11,21 +11,10 @@ import { useGetAllStationsQuery } from '../store/slices/stationsAPI';
 import Loading from '../components/Loading';
 import ErrorLoad from '../components/ErrorLoad';
 import BusRouteCard from '../components/BusRouteCard';
-let i = 0;
 const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamList, 'SearchScreen'>) => {  
-  console.log('rerender', i)
   const {data: allStations, isLoading: stationsIsLoading, error: stationsError} = useGetAllStationsQuery()
-  
   const [selectedSearchType, setSelectedSearchType] = useState<'byStations' | 'byRoute'>('byRoute')  
   const [resultData, setResultData] = useState<{sheduleItem: ISheduleItem, station: IBusStations}[]>()
-
-  const _renderItem = (item: {sheduleItem: ISheduleItem, station: IBusStations}) => {
-    return (
-      <RouteButton onPress={() => moveToRoute(item.sheduleItem)}>
-        <BusRouteCard station={item.station} sheduleItem={item.sheduleItem}/>
-      </RouteButton>
-    )
-  }
   
   const moveToRoute = (bus: ISheduleItem) => {
     navigation.navigate('Route', {screen: 'BusRoute', params: bus})
@@ -39,8 +28,16 @@ const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamLis
     actionText='На головну' 
     errorText='Помилка при завантаженні станці'/>
   }
-
-
+  
+  const _renderItem = (item: {sheduleItem: ISheduleItem, station: IBusStations}) => {
+    console.log('rerender')
+    return (
+      <RouteButton onPress={() => moveToRoute(item.sheduleItem)}>
+        <BusRouteCard station={item.station} sheduleItem={item.sheduleItem}/>
+      </RouteButton>
+    )
+  }
+  
   return (
     <Container>
       <SearchTypes>
@@ -67,21 +64,18 @@ const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamLis
           setResultsData={setResultData}/>
         }
       </Main>
-      <ResultContainer>
-      <FlashList contentContainerStyle={{
+      <FlatList contentContainerStyle={{
         padding: 5,
       }} 
       data={resultData}
-      estimatedItemSize={160}
       renderItem={({item}) => _renderItem(item)}
       />
-      </ResultContainer>
     </Container>
   )
 }
 
 const Container = styled.View`
-  flex-grow: 1;
+  flex-shrink: 1;
 `
 const SearchTypes = styled.View`
   flex-direction: row;
@@ -105,10 +99,6 @@ const SearchTypeText = styled.Text`
   color: #000;
 `
 const Main = styled.View`
-`
-const ResultContainer = styled.View`
-flex-grow: 1;
-margin-top: 5px;
 `
 const RouteButton = styled.TouchableOpacity`
 padding: 10px;

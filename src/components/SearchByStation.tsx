@@ -61,8 +61,7 @@ const SearchByStation = ({setResultsData, allStations}: Props) => {
         <SearchFieldContainer>
         {(attachedStations && selectedFromStation) &&
         (!selectedToStation
-            ?
-                <SearchFieldWithDropdown itemsForSearch={attachedStations.map(station => (station.stationName))} setSearchedVale={(value) => {
+            ?   <SearchFieldWithDropdown itemsForSearch={attachedStations.map(station => (station.stationName))} setSearchedVale={(value) => {
                     setSelectedToStation(attachedStations.find(station => station.stationName === value))
                 }} title='Куди'/>
             :   <SearchField enabled={false} itemsForSearch={[]} setSelectedValue={(value) => {

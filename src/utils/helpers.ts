@@ -40,3 +40,6 @@ export const getTicketsStatusColor = (ticketsStatus: string): string => {
     cardBackgroud = 'rgba(108, 231, 95, 0.5)';
   return cardBackgroud;
 };
+
+export const getCloser = (value: any, checkOne: number, checkTwo: number) =>
+  Math.abs(value - checkOne) < Math.abs(value - checkTwo) ? checkOne : checkTwo;

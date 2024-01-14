@@ -1,19 +1,20 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { NavigationContainer, NavigatorScreenParams } from '@react-navigation/native'
 import { createBottomTabNavigator, BottomTabScreenProps } from '@react-navigation/bottom-tabs'
-import { NativeStackScreenProps, createNativeStackNavigator,  } from '@react-navigation/native-stack'
+import { createNativeStackNavigator,  } from '@react-navigation/native-stack'
 
-import BusStations from '../screens/BusStations'
 import Search from '../screens/Search'
-import { Text, View } from 'react-native'
+import BusStations from '../screens/BusStations'
+import Map from '../screens/Map'
+import Info from '../screens/Info'
+import StationShedule from '../screens/StationShedule'
+import Route, { waypoints } from '../screens/Route'
+
+import { IBusStations, ISheduleItem } from '../store/types'
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MDIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 
-import StationShedule from '../screens/StationShedule'
-import { IBusStations, ISheduleItem } from '../store/types'
-import Route, { waypoints } from '../screens/Route'
-import Map from '../screens/Map'
-import Info from '../screens/Info'
 type Props = {}
 
 type RootBottomTabsParamList = {
@@ -87,27 +88,25 @@ const RouteNavigation = () => {
 const Navigation: React.FC<Props> = (props: Props) => {
   return (
     <NavigationContainer>
-      <BottomTab.Navigator>
+      <BottomTab.Navigator screenOptions={{
+        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarHideOnKeyboard: true
+      }}>
         <BottomTab.Screen name='BusShedule' component={BusSheduleNavigation} 
         options={{tabBarIcon: ({focused}) => {
             return <Icon name="list" size={20} color={focused ? "#41b874" : "#000"}/>
         },
-        tabBarShowLabel: false,
-        headerShown: false
         }}/>
         <BottomTab.Screen name='Info' component={Info} 
         options={{tabBarIcon: ({focused}) => {
             return <MDIcon name="information-outline" size={25} color={focused ? "#41b874" : "#000"}/>
         },
-        tabBarShowLabel: false,
-        headerShown: false
         }}/>
         <BottomTab.Screen name='Search' component={SearchNavigation} options={{
           tabBarIcon: ({focused}) => {
             return <Icon name="search" size={20} color={focused ? "#41b874" : "#000"}/>
         },
-        tabBarShowLabel: false,
-        headerShown: false
         }}/>
       </BottomTab.Navigator>
     </NavigationContainer>
