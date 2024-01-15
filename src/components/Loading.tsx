@@ -1,11 +1,13 @@
 import React from 'react'
 import { ActivityIndicator } from 'react-native'
 import styled from 'styled-components/native'
-
-const Loading = () => {
+type Props = {
+    color?: string
+}
+const Loading = ({color = '#41b874'}: Props) => {
     return (
         <Container>
-            <ActivityIndicator size='large'/>
+            <ActivityIndicator color={color} size='large'/>
         </Container>
     )
 

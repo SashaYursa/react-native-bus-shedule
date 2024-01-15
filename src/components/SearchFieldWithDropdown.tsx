@@ -3,6 +3,7 @@ import { FlatList, ScrollView, Animated, StyleSheet, View, Button } from 'react-
 import SearchField from './SearchField'
 import styled from 'styled-components/native'
 import { FlashList } from '@shopify/flash-list'
+import Collapsible from 'react-native-collapsible'
 
 type Props = {
     itemsForSearch: string[]
@@ -13,60 +14,44 @@ type Props = {
 const SearchFieldWithDropdown = ({itemsForSearch, title, setSearchedVale}: Props) => {
     const [searchItem, setSearchItem] = useState<{value: string | undefined, type: 'input' | undefined}>({value: undefined, type: undefined})
     const [valuesForSearchList, setValuesForSearchList] = useState<string[]>([])
-    const [expanded, setExpanded] = useState(false)
-    const [canShowList, setCanShowList] = useState(false)
-    const animHeightRef = useRef(new Animated.Value(0)).current
-    const opacityValue = animHeightRef.interpolate({ 
-        inputRange: [10, 200], 
-        outputRange: [0, 1]
-    });
-    
+    const [collapsed, setCollapsed] = useState<boolean>(true)
+    const [animationEnd, setAnimationEnd] = useState<boolean>(false)
+   
     useEffect(() => {
         if(searchItem.type === 'input' && typeof searchItem.value  === 'string'){
             const searchedValue = searchItem.value.toUpperCase()
             setValuesForSearchList(itemsForSearch.filter(item => item.toUpperCase().includes(searchedValue)))
             if(searchItem.value.length > 0){
-                console.log('set Expanded true')
-                setExpanded(true)
+                setCollapsed(false)
             }
             else{
-                setExpanded(false)
+                setCollapsed(true)
             }
         }
         else if(typeof searchItem.value === 'string'){
             setSearchedVale(searchItem.value)
-            setExpanded(false)
+            setCollapsed(true)
         }
-        return () => {setExpanded(false)}
+        return () => {setCollapsed(true)}
     }, [searchItem])
-    useEffect(() => {
-        if(expanded){
-            Animated.timing(animHeightRef, {
-                toValue: 210,
-                duration: 200,
-                useNativeDriver: false
-            }).start(() => setCanShowList(true))
-        }else{
-            Animated.timing(animHeightRef, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: false
-            }).start(() => setCanShowList(false))
-        }
-    }, [expanded])
-    useLayoutEffect(() => {
-        
-    }, [expanded])
   return (
-    <Animated.View style={[{position: 'relative', paddingBottom: animHeightRef}]}>
-        <SearchField enabled={true} 
+    <Animated.View>
+        <SearchField
         itemsForSearch={itemsForSearch.map(item => ({title: item, value: item}))} 
         selectedValue={searchItem.value} 
         setSelectedValue={(value, type) => setSearchItem({value, type})} 
         title={title}
         />
-        <Animated.View style={[style.expandView, {opacity: opacityValue, minHeight: animHeightRef}]}>
-            { (valuesForSearchList.length > 0 && searchItem.type && canShowList) && 
+        <Collapsible collapsed={collapsed} onAnimationEnd={() => {
+            console.log('anim', animationEnd)
+            if(collapsed){
+                setAnimationEnd(false)
+            }else{
+                setAnimationEnd(true)
+            }    
+        }}>
+        <CollapsedContainer>
+            { (valuesForSearchList.length > 0 && searchItem.type && animationEnd) && 
                 <FlashList showsVerticalScrollIndicator={false} 
                 contentContainerStyle={{ paddingTop: 5 }}
                 estimatedItemSize={30}
@@ -79,7 +64,8 @@ const SearchFieldWithDropdown = ({itemsForSearch, title, setSearchedVale}: Props
                 }
                 />
             }
-            </Animated.View>
+        </CollapsedContainer>
+        </Collapsible>
     </Animated.View>
     
   )
@@ -87,15 +73,7 @@ const SearchFieldWithDropdown = ({itemsForSearch, title, setSearchedVale}: Props
 
 const style = StyleSheet.create({
     expandView: {
-        paddingLeft: 10,
-        paddingRight: 10,
-        flex: 1,
-        height: 200,
-        top: 5,
-        width: '100%',
-        borderWidth: 1,
-        borderRadius: 12,
-        overflow: 'hidden',
+       
     }
 })
 
@@ -104,6 +82,16 @@ const SearchedValueButton = styled.TouchableOpacity`
     padding: 10px 5px;
     border-radius: 12px;
     margin-bottom: 5px;
+`
+
+const CollapsedContainer = styled.View`
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 200px;
+    border-width: 1px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 5px;
 `
 
 const SearchedValueText = styled.Text`

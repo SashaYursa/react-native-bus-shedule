@@ -1,12 +1,11 @@
-import { View, Text, Touchable, TouchableOpacity, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text } from 'react-native'
+import React from 'react'
 import styled from 'styled-components/native'
-import MapView, { Callout, CalloutSubview, LatLng, Marker } from 'react-native-maps'
+import MapView, { LatLng, Marker } from 'react-native-maps'
 import MapViewDirections from 'react-native-maps-directions'
 import { waypoint, waypoints } from '../screens/Route'
 import Config from "react-native-config";
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import IconIonic from 'react-native-vector-icons/Ionicons'
+import { sliceWaypointsArrayToConstLength } from '../utils/helpers'
 
 type Props = {
     waypoints: waypoints
@@ -14,42 +13,14 @@ type Props = {
     navigateToMapScreen: () => void
 }
 
-export const sliceArrayToConstLength = (arr: waypoint[], maxPoints: number) => {
-    let res = [...arr]
-    if(res.length === 0){
-        return [];
-    }
-    if(res.length < maxPoints){
-        return arr;
-    }
-    if(res.length > maxPoints){
-        while(res.length > maxPoints){
-            const needToRemove = res.length - maxPoints
-            let removeEvery = Math.ceil(res.length / needToRemove)
-            console.log(removeEvery, 'remove')
-            let lastRemoved = removeEvery
-            res = arr.filter((item: any, index: number) => {
-            if((index + 1) === lastRemoved){
-                    lastRemoved += removeEvery
-                return false
-                }
-            return true
-            })
-        }
-    console.log(arr, 'old')
-    console.log(res, 'new')
-    return res
-    }
-    return []
-}
-
 const RouteMap = ({waypoints, updateMapPoint, navigateToMapScreen}: Props) => {
+    console.log('rerender')
     if(!waypoints?.last || !waypoints.first){
         return <View><Text>Error</Text></View>
     }
     let middleWayPointsForDirection: waypoint[] = [];
     if(waypoints.middle){
-        sliceArrayToConstLength(waypoints.middle, 23)
+        middleWayPointsForDirection = sliceWaypointsArrayToConstLength(waypoints.middle, 23)
     } 
 
     return (

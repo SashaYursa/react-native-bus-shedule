@@ -14,6 +14,8 @@ const BusStations = ({navigation}: NativeStackScreenProps<BusStackParamList, 'Bu
   const netInfo = useNetInfo();
   const {data: stations, isLoading: stationsLoading, error, refetch} = useGetStationsQuery()
   const [filteredStations, setFilteredStations] = useState(stations)
+  const [searchFieldIsFocused, setSearchFieldIsFocused] = useState<boolean>(false)
+  console.log('rerender')
   
   useEffect(() => {
     if(netInfo.isConnected){
@@ -26,7 +28,6 @@ const BusStations = ({navigation}: NativeStackScreenProps<BusStackParamList, 'Bu
   }, [error])
 
   useEffect(() => {
-    console.log('true')
     if(stations){
       setFilteredStations(stations)
     }
@@ -58,9 +59,16 @@ const BusStations = ({navigation}: NativeStackScreenProps<BusStackParamList, 'Bu
   ? (
     <Container>
       <FlatList  
+      onScrollBeginDrag={() => {
+        if(searchFieldIsFocused){
+          setSearchFieldIsFocused(false)
+        }
+      }}
       data={filteredStations}
       stickyHeaderHiddenOnScroll={true}
-      ListHeaderComponent={<Search updateFilter={updateFilter}/>}
+      ListHeaderComponent={<Search isFocused={searchFieldIsFocused} 
+                            setIsFocused={setSearchFieldIsFocused} 
+                            updateFilter={updateFilter}/>}
       stickyHeaderIndices={[0]}
       renderItem={({item}) => _renderItem(item)}/>
     </Container>

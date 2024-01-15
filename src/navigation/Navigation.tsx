@@ -8,7 +8,7 @@ import BusStations from '../screens/BusStations'
 import Map from '../screens/Map'
 import Info from '../screens/Info'
 import StationShedule from '../screens/StationShedule'
-import Route, { waypoints } from '../screens/Route'
+import Route from '../screens/Route'
 
 import { IBusStations, ISheduleItem } from '../store/types'
 
@@ -35,7 +35,7 @@ export type BusFindStackParamList = {
 
 export type RouteStackParamList = {
   BusRoute: ISheduleItem;
-  Map: {waypoints: waypoints, busId: number}
+  Map: {busId: number}
 };
 export type InfoParamList = {
 };

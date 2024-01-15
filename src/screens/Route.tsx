@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import React, { useEffect, useLayoutEffect } from 'react'
+import React, { useEffect } from 'react'
 import { ActivityIndicator, Text, View, StyleSheet } from 'react-native'
-import { BusStackParamList, RouteStackParamList } from '../navigation/Navigation'
+import { RouteStackParamList } from '../navigation/Navigation'
 import { useGetRouteQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -218,7 +218,7 @@ const Route = ({route, navigation}: NativeStackScreenProps<RouteStackParamList, 
             <RouteMap  
             waypoints={waypoints} 
             updateMapPoint={updateMapPoint} 
-            navigateToMapScreen={() => navigation.navigate('Map', {waypoints, busId: data.bus.id})}
+            navigateToMapScreen={() => navigation.navigate('Map', {busId: data.bus.id})}
             />
         }
     </Container>

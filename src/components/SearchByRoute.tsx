@@ -6,15 +6,18 @@ import styled from 'styled-components/native'
 import { IBusStations, ISheduleItem } from '../store/types'
 import BusRouteCard from './BusRouteCard'
 import SearchField from './SearchField'
+import Loading from './Loading'
+import ErrorLoad from './ErrorLoad'
 type Props = {
   setResultsData: (data: {sheduleItem: ISheduleItem, station: IBusStations}[]) => void
   allStations: IBusStations[]
+  navigateToMain: () => void
 }
 
-const SearchByRoute = ({setResultsData, allStations}: Props) => {
+const SearchByRoute = ({setResultsData, allStations, navigateToMain}: Props) => {
   const [selectedStation, setSelectedStation] = useState<IBusStations>() 
   const [selectedRoute, setSelectedRoute] = useState<string>() 
-  const [getRoutes, {data: routes, isError: routesHasError, isLoading: routesIsLoading}] = useLazyGetStationRoutesQuery()
+  const [getRoutes, {data: routes, isError: routesHasError, error: routeError, isLoading: routesIsLoading}] = useLazyGetStationRoutesQuery()
   const [stationsForSelect, setStationsForSelect] = useState<{title: string, value: string}[]>([])
   const [routesForSelect, setRoutesForSelect] = useState<{title: string, value: string}[]>([])
   const [selectedRoutes, setSelectedRoutes] = useState<null | ISheduleItem[]>(null)
@@ -43,30 +46,27 @@ const SearchByRoute = ({setResultsData, allStations}: Props) => {
 
   useEffect(() => {
     if(selectedStation){
+      console.log('getRoutes----' )
       getRoutes(selectedStation?.id)
     }
   }, [selectedStation])
   
-  if(!stationsForSelect){
+  if(!stationsForSelect || routesHasError){
     return (
-      <View>
-        <Text>
-          Помилка при отриманні станцій
-        </Text>
-      </View>
+    <ErrorLoad errorText='Помилка при отриманні странцій' 
+    actionHandler={() => navigateToMain()}
+    actionText='На головну'/>
     )
   }
   if(routesIsLoading){
-    return <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-        <ActivityIndicator size='large'/>
-      </View>
+    return <Loading/>
   }
 
   return (
 	<Container>
     <SelectorHeader>Станція</SelectorHeader>
     <SelectorContainer>
-      <Selector enabled={true} 
+      <Selector
         selectedValue={selectedStation ? String(selectedStation.id) : undefined} 
         setSelectedValue={(id) => setSelectedStation(allStations.find(station => station.id === Number(id)))} 
         items={stationsForSelect}
@@ -74,7 +74,7 @@ const SearchByRoute = ({setResultsData, allStations}: Props) => {
     </SelectorContainer>
     <SelectorHeader>Маршрут</SelectorHeader>
     <SelectorContainer>
-      <SearchField enabled={!!selectedStation} 
+      <SearchField
       title="Маршрут"
       itemsForSearch={routesForSelect} 
       selectedValue={selectedRoute ? selectedRoute : undefined} 

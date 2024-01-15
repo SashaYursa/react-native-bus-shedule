@@ -1,21 +1,19 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react'
-import { Button, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Callout, LatLng, Marker, Polyline, Region } from 'react-native-maps';
+import { Text, TouchableOpacity, View } from 'react-native';
+import MapView, { LatLng, Region } from 'react-native-maps';
 import styled from 'styled-components/native';
-import { BusStackParamList } from '../navigation/Navigation';
+import { BusStackParamList, RouteStackParamList } from '../navigation/Navigation';
 import { useAddBusStationLocationMutation, useUpdateBusStationPointMutation, useGetRouteQuery } from '../store/slices/stationsAPI';
 import MapViewDirections from 'react-native-maps-directions';
 import Config from 'react-native-config';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import IconIonic from 'react-native-vector-icons/Ionicons'
 import { waypoint, waypoints } from './Route';
 import MapMarker from '../components/MapMarker';
-import { CommonActions } from '@react-navigation/native';
 import MapRouteList from '../components/MapRouteList';
 import { IBusRoute } from '../store/types';
 import ErrorLoad from '../components/ErrorLoad';
-import { sliceArrayToConstLength } from '../components/RouteMap';
+import { sliceWaypointsArrayToConstLength } from '../utils/helpers';
 
 export type mapPoint = {
     isMissed: boolean,
@@ -25,15 +23,14 @@ export type mapPoint = {
 
 type Props = {}
 
-const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map'>) => {
+const Map = ({route, navigation}: NativeStackScreenProps<RouteStackParamList, 'Map'>) => {
     const {busId} = route.params
     const {isLoading, error, isError, data: res} = useGetRouteQuery(busId);
-    // console.log(res)
     const [selectedMarker, setSelectedMarker] = useState<number | null>(null)
     const [points, setPoints] = useState<mapPoint[]>([])
     const [currentAddPointId, setCurrentAddPointId] = useState<number | null>(null)
     const [createMapPosition, setCreateMapPosition] = useState<Region | null>(null)
-    const [addBusStationLocation , {data: addData, error: addError}] = useAddBusStationLocationMutation()
+    const [addBusStationLocation, {data: addData, error: addError}] = useAddBusStationLocationMutation()
     const [updateBusPoint , {data: updatePointData, error: updatePointError}] = useUpdateBusStationPointMutation()
     const mapRef = useRef<MapView | null>(null)
     const [data, setData] = useState<IBusRoute|null>(null) 
@@ -44,7 +41,6 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
     }, [res])
 
     let waypoints: waypoints = null
-
 
     if(data?.route?.points){
         let res: waypoint[] = (data.route.points.filter(i => i.fullAddress !== null).map((point) => {
@@ -76,11 +72,11 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
             waypoints = {first, middle: res, last}
         }
     }
-    //need to rework
     
     let wayPointsForMiddleDirection: waypoint[] = []
     if(waypoints?.middle){
-        wayPointsForMiddleDirection = sliceArrayToConstLength(waypoints?.middle, 23)
+        console.log('rerender map')
+        wayPointsForMiddleDirection = sliceWaypointsArrayToConstLength(waypoints?.middle, 23)
     }
 
     
@@ -108,10 +104,10 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
         return (
         <View style={{flex: 1, backgroundColor: "#fff", alignItems: 'center', justifyContent: 'center'}}>
             <Text style={{fontSize: 16, color: '#000', fontWeight: '700'}}>Помилка</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('BusStations')}
+            <TouchableOpacity onPress={() => navigation.goBack()}
             style={{marginTop: 10, borderRadius: 12, backgroundColor: '#000', padding: 10}}>
                 <Text style={{fontSize: 14, color: '#fff'}}>
-                    На головну
+                    Назад
                 </Text>
             </TouchableOpacity>
         </View>
@@ -145,9 +141,10 @@ const Map = ({route, navigation}: NativeStackScreenProps<BusStackParamList, 'Map
         setSelectedMarker(null)
     }
 
-    
     const setCreateMapPointRegion = (region: Region) => {
-        setCreateMapPosition(region)
+        if(currentAddPointId){
+            setCreateMapPosition(region)
+        }
     }
 
     const handleSetSelectedMarker = (marker: number) => {

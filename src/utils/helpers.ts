@@ -1,3 +1,4 @@
+import {waypoint} from '../screens/Route';
 import {MONTH} from './constants';
 
 export const transformDate = (date: number): string => {
@@ -43,3 +44,37 @@ export const getTicketsStatusColor = (ticketsStatus: string): string => {
 
 export const getCloser = (value: any, checkOne: number, checkTwo: number) =>
   Math.abs(value - checkOne) < Math.abs(value - checkTwo) ? checkOne : checkTwo;
+
+export const sliceWaypointsArrayToConstLength = (
+  arr: waypoint[],
+  maxPoints: number,
+) => {
+  let res = [...arr];
+  if (res.length === 0) {
+    return [];
+  }
+  if (res.length < maxPoints) {
+    return arr;
+  }
+  if (res.length > maxPoints) {
+    while (res.length > maxPoints) {
+      // console.log(res, 'res');
+      console.log(res.length, 'len');
+      const needToRemove = res.length - maxPoints;
+      let removeEvery = Math.ceil(res.length / needToRemove);
+      // console.log(removeEvery, 'remove');
+      let lastRemoved = removeEvery;
+      res = res.filter((item: any, index: number) => {
+        if (index + 1 === lastRemoved) {
+          lastRemoved += removeEvery;
+          return false;
+        }
+        return true;
+      });
+    }
+    console.log(arr, 'old');
+    console.log(res, 'new');
+    return res;
+  }
+  return [];
+};

@@ -1,69 +1,87 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components/native'
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, TouchableOpacity, View } from 'react-native';
 import SearchByRoute from '../components/SearchByRoute';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { BusFindStackParamList } from '../navigation/Navigation';
 import { IBusStations, ISheduleItem } from '../store/types';
 import SearchByStation from '../components/SearchByStation';
-import { FlashList } from '@shopify/flash-list';
 import { useGetAllStationsQuery } from '../store/slices/stationsAPI';
 import Loading from '../components/Loading';
 import ErrorLoad from '../components/ErrorLoad';
 import BusRouteCard from '../components/BusRouteCard';
-const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamList, 'SearchScreen'>) => {  
+import Collapsible from 'react-native-collapsible';
+const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamList, 'SearchScreen'>) => {
   const {data: allStations, isLoading: stationsIsLoading, error: stationsError} = useGetAllStationsQuery()
   const [selectedSearchType, setSelectedSearchType] = useState<'byStations' | 'byRoute'>('byRoute')  
-  const [resultData, setResultData] = useState<{sheduleItem: ISheduleItem, station: IBusStations}[]>()
-  
+  const [resultData, setResultData] = useState<{sheduleItem: ISheduleItem, station: IBusStations}[]>([])
+  const [collapsed, setIsCollapsed] = useState<boolean>(true)
   const moveToRoute = (bus: ISheduleItem) => {
     navigation.navigate('Route', {screen: 'BusRoute', params: bus})
-  } 
+  }
+
+  const changeScreen = () =>{
+    setIsCollapsed(true)
+    setResultData([])
+    setSelectedSearchType(selectedSearchType === 'byRoute' ? 'byStations' : 'byRoute')
+  }
+  useEffect(() => {
+    setIsCollapsed(true)
+  }, [resultData])
   
   if(stationsIsLoading){
-    return <Loading/>
+    return <Loading color='#000'/>
   }
   if(!allStations){
     return <ErrorLoad actionHandler={() => navigation.goBack()} 
     actionText='На головну' 
     errorText='Помилка при завантаженні станці'/>
   }
+
   
   const _renderItem = (item: {sheduleItem: ISheduleItem, station: IBusStations}) => {
-    console.log('rerender')
     return (
       <RouteButton onPress={() => moveToRoute(item.sheduleItem)}>
         <BusRouteCard station={item.station} sheduleItem={item.sheduleItem}/>
       </RouteButton>
     )
   }
-  
+
   return (
     <Container>
-      <SearchTypes>
-        <SearchType 
-        onPress={() => selectedSearchType !== 'byRoute' ? setSelectedSearchType('byRoute'): {}} 
-        style={selectedSearchType === 'byRoute' ? {backgroundColor: '#000'}: {}}>
-          <SearchTypeText style={selectedSearchType === 'byRoute' ? {color: '#fff'}: {}}>
-            По маршрутах
-          </SearchTypeText>
-        </SearchType>
-        <SearchType 
-        onPress={() => selectedSearchType !== 'byStations' ? setSelectedSearchType('byStations'): {}} 
-        style={selectedSearchType === 'byStations' ? {backgroundColor: '#000'}: {}}>
-          <SearchTypeText style={selectedSearchType === 'byStations' ? {color: '#fff'}: {}}>
-            По станціях
-          </SearchTypeText>
-        </SearchType>
-      </SearchTypes>
-      <Main>
-        {selectedSearchType === 'byRoute' 
-        ? <SearchByRoute allStations={allStations.filter(station => !!station.linkToSheduleBoard)} 
-          setResultsData={setResultData}/>
-        : <SearchByStation allStations={allStations} 
+      <Collapsible collapsed={collapsed} style={{backgroundColor: "#eaeaea"}}>
+        <Main>
+          {selectedSearchType === 'byRoute' 
+          ? <SearchByRoute allStations={allStations.filter(station => !!station.linkToSheduleBoard)} 
+          setResultsData={setResultData}
+          navigateToMain={() => navigation.goBack()}
+          />
+          : <SearchByStation allStations={allStations} 
           setResultsData={setResultData}/>
         }
-      </Main>
+        </Main>
+      </Collapsible>
+      {/* // TODO REWORK */}
+      <TouchableOpacity onPress={() => setIsCollapsed(coll => !coll)}
+      style={{width: 100, borderBottomLeftRadius: 12, borderBottomRightRadius: 12,  top: 0, left: '50%', transform: [{translateX: -50}], height: 25, opacity: 1, backgroundColor: '#000'}}>
+      </TouchableOpacity>
+      <SearchTypes style={{zIndex: 10}}>
+          <SearchType 
+          onPress={() => selectedSearchType !== 'byRoute' && changeScreen()} 
+          style={selectedSearchType === 'byRoute' && {backgroundColor: '#000'}}>
+            <SearchTypeText style={selectedSearchType === 'byRoute' && {color: '#fff'}}>
+              По маршрутах
+            </SearchTypeText>
+          </SearchType>
+          <SearchType 
+          onPress={() => selectedSearchType !== 'byStations' && changeScreen()} 
+          style={selectedSearchType === 'byStations' && {backgroundColor: '#000'}}>
+            <SearchTypeText style={selectedSearchType === 'byStations' && {color: '#fff'}}>
+              По станціях
+            </SearchTypeText>
+          </SearchType>
+        </SearchTypes>
+     
       <FlatList contentContainerStyle={{
         padding: 5,
       }} 
@@ -99,6 +117,10 @@ const SearchTypeText = styled.Text`
   color: #000;
 `
 const Main = styled.View`
+padding-bottom: 10px;
+border-radius: 0 0 10px 10px;
+overflow: hidden;
+background-color: #ffffff;
 `
 const RouteButton = styled.TouchableOpacity`
 padding: 10px;

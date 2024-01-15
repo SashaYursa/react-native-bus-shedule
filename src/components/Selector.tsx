@@ -8,9 +8,9 @@ type Props = {
     title: string,
     selectedValue: string | undefined,
     setSelectedValue: (value: string) => void, 
-    enabled: boolean,
+    enabled?: boolean,
 }   
-const Selector = ({items, title, selectedValue, setSelectedValue, enabled}: Props) => {
+const Selector = ({items, title, selectedValue, setSelectedValue, enabled = true}: Props) => {
     return (
         <Container style={!enabled ? {backgroundColor: '#707070', borderWidth: 0} : {}}>
             <Picker 

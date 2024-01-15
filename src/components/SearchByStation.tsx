@@ -1,25 +1,28 @@
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, ScrollView, Text, View } from 'react-native'
 import { IBusStations, ISheduleItem } from '../store/types'
-import Search from './Search'
-import SearchField from './SearchField'
 import styled from 'styled-components/native'
 import { useLazyGetAttachedStationsQuery, useLazyGetRouteByPointsQuery } from '../store/slices/stationsAPI'
 import SearchFieldWithDropdown from './SearchFieldWithDropdown'
-import { FlashList } from '@shopify/flash-list'
-import BusRouteCard from './BusRouteCard'
 import Loading from './Loading'
+import SelectedStation from './SelectedStation'
 
 type Props = {
     setResultsData: (data: {sheduleItem: ISheduleItem, station: IBusStations}[]) => void
     allStations: IBusStations[];
 }
-
-const SearchByStation = ({setResultsData, allStations}: Props) => {
-    const [getAttachedStations, {data: attachedStations, isLoading: attachedStationsIsLoading, error: attachedStationsError}] = useLazyGetAttachedStationsQuery()
-    const [selectedFromStation, setSelectedFromStation] = useState<IBusStations>()
-    const [selectedToStation, setSelectedToStation] = useState<IBusStations>()
-    const [getRoutes, {data: routesResult, error: routesError, isLoading: routesIsLoading}] = useLazyGetRouteByPointsQuery()
+const SearchByStation = ({allStations, setResultsData}: Props) => {
+    const [getAttachedStations, {
+        data: attachedStations, 
+        isLoading: attachedStationsIsLoading, 
+        error: attachedStationsError
+    }] = useLazyGetAttachedStationsQuery()
+    const [getRoutes, {
+        data: routesResult, 
+        error: routesError, 
+        isLoading: routesIsLoading
+    }] = useLazyGetRouteByPointsQuery()
+    const [selectedFromStation, setSelectedFromStation] = useState<IBusStations | null>(null)
+    const [selectedToStation, setSelectedToStation] = useState<IBusStations | null>(null)
 
     useEffect(() => {
         if(selectedFromStation){
@@ -38,38 +41,58 @@ const SearchByStation = ({setResultsData, allStations}: Props) => {
         if(routesResult && selectedFromStation){
             setResultsData(routesResult.map(item => ({sheduleItem: item, station: selectedFromStation})))
         }
-    }, [routesResult])
+    }, [routesResult]) 
     
+    const updateSelectedFromStation = (value: string) => {
+        const findedStation = allStations.find(station => station.stationName === value)
+        if(findedStation){
+            setSelectedFromStation(findedStation)
+        }
+    }
+    const updateSelectedToStation = (value: string) => {
+        if(attachedStations){
+            const findedStation = attachedStations.find(station => station.stationName === value)
+            if(findedStation){
+                setSelectedToStation(findedStation)
+            }
+        }
+    }
+
     if(attachedStationsIsLoading || routesIsLoading){
         return <Loading/>
     }
 
     return (
     <Container>
+        <SelectorHeader>Звідки</SelectorHeader>
         <SearchFieldContainer>
-        {!selectedFromStation
-        ? <SearchFieldWithDropdown title='Звідки'
-            setSearchedVale={(value) => setSelectedFromStation(allStations.find(station => station.stationName === value))}
-            itemsForSearch={allStations.map(station => (station.stationName))}
-        />
-        : <SearchField enabled={false} itemsForSearch={[]} setSelectedValue={(value) => {
-            setSelectedFromStation(undefined)
-            setSelectedToStation(undefined)
-        }} title={selectedFromStation.stationName} selectedValue={selectedFromStation.stationName}/>
+        {selectedFromStation
+            ? <SelectedStation cancel={() => {
+                setSelectedToStation(null)
+                setSelectedFromStation(null)
+                }} 
+                name={selectedFromStation.stationName} />
+            : <SearchFieldWithDropdown title='Звідки'
+                itemsForSearch={allStations.map(station => (station.stationName))}
+                setSearchedVale={updateSelectedFromStation}
+            />
         }
         </SearchFieldContainer>
-        <SearchFieldContainer>
-        {(attachedStations && selectedFromStation) &&
-        (!selectedToStation
-            ?   <SearchFieldWithDropdown itemsForSearch={attachedStations.map(station => (station.stationName))} setSearchedVale={(value) => {
-                    setSelectedToStation(attachedStations.find(station => station.stationName === value))
-                }} title='Куди'/>
-            :   <SearchField enabled={false} itemsForSearch={[]} setSelectedValue={(value) => {
-                setSelectedToStation(undefined)
-            }} title={selectedToStation.stationName} selectedValue={selectedToStation.stationName}/>
-        )
-        }
-            </SearchFieldContainer>
+            {(attachedStations && selectedFromStation) &&
+            <>
+                <SelectorHeader>Куди</SelectorHeader>
+                <SearchFieldContainer>
+                    {selectedToStation
+                        ? <SelectedStation cancel={() => setSelectedToStation(null)} 
+                            name={selectedToStation.stationName} />
+                        : <SearchFieldWithDropdown title='Куди'
+                            itemsForSearch={attachedStations.map(station => (station.stationName))} 
+                            setSearchedVale={updateSelectedToStation} 
+                        />
+                    }
+                </SearchFieldContainer>
+            </>
+            }
     </Container>
   )
 }
@@ -77,10 +100,15 @@ const SearchByStation = ({setResultsData, allStations}: Props) => {
 const Container = styled.View`
 flex-grow: 1;
 `
-
 const SearchFieldContainer = styled.View`
 padding: 5px;
 `
-
+const SelectorHeader = styled.Text`
+font-size: 16px;
+font-weight: 700;
+color: #000;
+text-align: center;
+margin: 5px 0;
+`
 
 export default SearchByStation
