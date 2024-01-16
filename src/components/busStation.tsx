@@ -19,13 +19,15 @@ const BusStation = ({station, moveToStationShedule}: Props) => {
             <BusStationInfo>
                 <BusStationTitle>{station.stationName}</BusStationTitle>
                 <BusStationInfoContainer>
-                    <Icon name='map-marker' size={18}/>
-                    <BusStationStreet numberOfLines={1}>{station.stationAddress}</BusStationStreet>
-                </BusStationInfoContainer>
-                <BusStationInfoContainer>
                     <Icon name='update' size={18}/>
                     <LastUpdateStationText>Оновлено: {lastUpdate}</LastUpdateStationText>
                 </BusStationInfoContainer>
+                {station.stationAddress && 
+                <BusStationInfoContainer>
+                    <Icon name='map-marker' size={18}/>
+                    <BusStationStreet numberOfLines={1}>{station.stationAddress}</BusStationStreet>
+                </BusStationInfoContainer>
+                }
             </BusStationInfo>
         </BusStationButton>
     )

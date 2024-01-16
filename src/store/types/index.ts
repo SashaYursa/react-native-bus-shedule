@@ -5,9 +5,9 @@ export interface IBusStations {
   stationLink: string | null;
   stationPhoneNumber: null;
   stationAddress: string | null;
-  latitude: number;
-  longitude: number;
-  stationLastUpdate: string;
+  latitude: number | null;
+  longitude: number | null;
+  stationLastUpdate: string | null;
   last_updated_at: string;
 }
 export interface ISheduleItem {

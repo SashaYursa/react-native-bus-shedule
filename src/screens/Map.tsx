@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native';
 import MapView, { LatLng, Region } from 'react-native-maps';
 import styled from 'styled-components/native';
-import { BusStackParamList, RouteStackParamList } from '../navigation/Navigation';
+import { RouteStackParamList } from '../navigation/Navigation';
 import { useAddBusStationLocationMutation, useUpdateBusStationPointMutation, useGetRouteQuery } from '../store/slices/stationsAPI';
 import MapViewDirections from 'react-native-maps-directions';
 import Config from 'react-native-config';

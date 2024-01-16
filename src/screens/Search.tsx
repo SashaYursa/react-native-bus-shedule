@@ -1,6 +1,6 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components/native'
-import { FlatList, TouchableOpacity, View } from 'react-native';
+import { FlatList } from 'react-native';
 import SearchByRoute from '../components/SearchByRoute';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { BusFindStackParamList } from '../navigation/Navigation';
@@ -26,7 +26,9 @@ const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamLis
     setSelectedSearchType(selectedSearchType === 'byRoute' ? 'byStations' : 'byRoute')
   }
   useEffect(() => {
-    setIsCollapsed(true)
+    if(selectedSearchType === 'byStations'){
+      setIsCollapsed(true)
+    }
   }, [resultData])
   
   if(stationsIsLoading){
@@ -61,26 +63,27 @@ const Search = ({navigation, route}: NativeStackScreenProps<BusFindStackParamLis
         }
         </Main>
       </Collapsible>
-      {/* // TODO REWORK */}
-      <TouchableOpacity onPress={() => setIsCollapsed(coll => !coll)}
-      style={{width: 100, borderBottomLeftRadius: 12, borderBottomRightRadius: 12,  top: 0, left: '50%', transform: [{translateX: -50}], height: 25, opacity: 1, backgroundColor: '#000'}}>
-      </TouchableOpacity>
-      <SearchTypes style={{zIndex: 10}}>
-          <SearchType 
-          onPress={() => selectedSearchType !== 'byRoute' && changeScreen()} 
-          style={selectedSearchType === 'byRoute' && {backgroundColor: '#000'}}>
-            <SearchTypeText style={selectedSearchType === 'byRoute' && {color: '#fff'}}>
-              По маршрутах
-            </SearchTypeText>
-          </SearchType>
-          <SearchType 
-          onPress={() => selectedSearchType !== 'byStations' && changeScreen()} 
-          style={selectedSearchType === 'byStations' && {backgroundColor: '#000'}}>
-            <SearchTypeText style={selectedSearchType === 'byStations' && {color: '#fff'}}>
-              По станціях
-            </SearchTypeText>
-          </SearchType>
-        </SearchTypes>
+      <ChangeCollapsibleButton onPress={() => setIsCollapsed(coll => !coll)}>
+        <CollapsibleButtonLine/>
+        <CollapsibleButtonLine/>
+        <CollapsibleButtonLine style={{marginBottom: 0}}/>
+      </ChangeCollapsibleButton>
+      <SearchTypes>
+        <SearchType 
+        onPress={() => selectedSearchType !== 'byRoute' && changeScreen()} 
+        style={selectedSearchType === 'byRoute' && {backgroundColor: '#000'}}>
+          <SearchTypeText style={selectedSearchType === 'byRoute' && {color: '#fff'}}>
+            По маршрутах
+          </SearchTypeText>
+        </SearchType>
+        <SearchType 
+        onPress={() => selectedSearchType !== 'byStations' && changeScreen()} 
+        style={selectedSearchType === 'byStations' && {backgroundColor: '#000'}}>
+          <SearchTypeText style={selectedSearchType === 'byStations' && {color: '#fff'}}>
+            По станціях
+          </SearchTypeText>
+        </SearchType>
+      </SearchTypes>
      
       <FlatList contentContainerStyle={{
         padding: 5,
@@ -100,6 +103,7 @@ const SearchTypes = styled.View`
   margin-top: 5px;
   padding: 5px;
   justify-content: space-evenly;
+  z-index: 10;
 `
 const SearchType = styled.TouchableOpacity`
   overflow: hidden;
@@ -128,6 +132,24 @@ border-radius: 12px;
 background-color: rgba(127, 17, 224, .2);
 overflow: hidden;
 margin-bottom: 5px;
+`
+
+const ChangeCollapsibleButton = styled.TouchableOpacity`
+  width: 100px; 
+  border-bottom-right-radius: 12px;
+  border-bottom-left-radius: 12px;  
+  align-self: center;
+  height: 25px; 
+  opacity: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+`
+const CollapsibleButtonLine = styled.View`
+  width: 30px;
+  height: 1.5px;
+  margin-bottom: 3px;
+  background-color: #fff;
 `
 
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { FlatList, ScrollView, Animated, StyleSheet, View, Button } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Animated, StyleSheet } from 'react-native'
 import SearchField from './SearchField'
 import styled from 'styled-components/native'
 import { FlashList } from '@shopify/flash-list'

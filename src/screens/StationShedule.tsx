@@ -1,16 +1,16 @@
-import React, { useEffect, useRef } from 'react'
-import { ActivityIndicator, FlatList, Text, View, TouchableOpacity, Vibration, Animated, Easing } from 'react-native'
+import React, { useEffect } from 'react'
+import { Vibration, Animated, Easing } from 'react-native'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { BusStackParamList } from '../navigation/Navigation'
 import { useGetSheduleQuery } from '../store/slices/stationsAPI'
 import styled from 'styled-components/native'
-import { IBusRoute, ISheduleItem } from '../store/types'
-import RouteLine from '../components/RouteLine'
+import { ISheduleItem } from '../store/types'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ErrorLoad from '../components/ErrorLoad'
 import BusRouteCard from '../components/BusRouteCard'
 import { formattingDate, getTicketsStatusColor } from '../utils/helpers'
-import { useNavigation } from '@react-navigation/native'
+import { FlashList } from '@shopify/flash-list'
+import Loading from '../components/Loading'
 const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackParamList, 'StationShedule'>) => {
     const rotateAnim = new Animated.Value(0);
     Animated.loop(
@@ -91,11 +91,7 @@ const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackP
         )
     }
     if(sheduleIsLoading){
-        return (
-            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                <ActivityIndicator size='large'/>
-            </View>
-        )
+        return <Loading />
     }
 
     return (
@@ -106,7 +102,10 @@ const StationShedule = ({ navigation , route }: NativeStackScreenProps<BusStackP
                     Наразі інформації щодо розкладу немає
                 </BusRouteStatusText>
             </NoDataContainer>
-            : <FlatList contentContainerStyle={{padding: 5}} renderItem={({item}) => _renderItem(item)} data={sheduleData}/>
+            : <FlashList estimatedItemSize={175} 
+                contentContainerStyle={{padding: 5}} 
+                data={sheduleData}
+                renderItem={({item}) => _renderItem(item)}/>
             }
         </Container>
     )
@@ -116,7 +115,6 @@ const Container = styled.View`
     flex-shrink: 1;
     background-color: #fff;
 `
-
 const BusRouteButton = styled.TouchableOpacity`
     padding: 10px;
     border-radius: 12px;
@@ -124,25 +122,21 @@ const BusRouteButton = styled.TouchableOpacity`
     overflow: hidden;
     margin-bottom: 5px;
 `
-
 const BusRouteStatus = styled.View`
     flex-grow: 1;
     flex-direction: row;
 ` 
-
 const BusRouteStatusText = styled.Text`
     font-size: 16px;
     color: #000;
     font-weight: 700;
 `
-
 const HeaderUpdateContainer = styled.View`
 `
 const HeaderUpdateText = styled.Text`
     font-size: 14px;
     color: #000;
 `
-
 const NoDataContainer =styled.View`
     flex-grow: 1;
     align-items: center;
