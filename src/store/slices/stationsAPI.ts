@@ -6,7 +6,7 @@ import {
   ISheduleItem,
 } from '../types';
 import {Socket, io} from 'socket.io-client';
-import {Platform} from 'react-native';
+import {DEFAULT_API_URL} from '../../utils/constants';
 
 interface addBusLocation {
   id: number;
@@ -16,7 +16,7 @@ interface addBusLocation {
 
 export const stationApi = createApi({
   reducerPath: 'stationsApi',
-  baseQuery: fetchBaseQuery({baseUrl: 'http://192.168.0.108:3000/'}),
+  baseQuery: fetchBaseQuery({baseUrl: DEFAULT_API_URL}),
   tagTypes: ['route'],
   endpoints: build => ({
     getStations: build.query<IBusStations[], void>({
@@ -35,7 +35,7 @@ export const stationApi = createApi({
         {updateCachedData, cacheDataLoaded, cacheEntryRemoved},
       ) {
         await cacheDataLoaded;
-        const socket: Socket = io('http://192.168.0.108:3000');
+        const socket: Socket = io(DEFAULT_API_URL);
         socket.on('connect', () => {
           socket.emit(
             'subscribeToUpdateShedule',

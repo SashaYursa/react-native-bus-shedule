@@ -8,6 +8,8 @@ import BusRouteCard from './BusRouteCard'
 import SearchField from './SearchField'
 import Loading from './Loading'
 import ErrorLoad from './ErrorLoad'
+import SearchFieldWithDropdown from './SearchFieldWithDropdown'
+import SelectedStation from './SelectedStation'
 type Props = {
   setResultsData: (data: {sheduleItem: ISheduleItem, station: IBusStations}[]) => void
   allStations: IBusStations[]
@@ -15,10 +17,10 @@ type Props = {
 }
 
 const SearchByRoute = ({setResultsData, allStations, navigateToMain}: Props) => {
-  const [selectedStation, setSelectedStation] = useState<IBusStations>() 
+  const [selectedStation, setSelectedStation] = useState<IBusStations | null>() 
   const [selectedRoute, setSelectedRoute] = useState<string>() 
   const [getRoutes, {data: routes, isError: routesHasError, error: routeError, isLoading: routesIsLoading}] = useLazyGetStationRoutesQuery()
-  const [stationsForSelect, setStationsForSelect] = useState<{title: string, value: string}[]>([])
+  const [stationsForSelect, setStationsForSelect] = useState<string[]>([])
   const [routesForSelect, setRoutesForSelect] = useState<{title: string, value: string}[]>([])
   const [selectedRoutes, setSelectedRoutes] = useState<null | ISheduleItem[]>(null)
   useEffect(() => {
@@ -32,7 +34,7 @@ const SearchByRoute = ({setResultsData, allStations, navigateToMain}: Props) => 
 
   useEffect(() => {
     if(allStations){
-      setStationsForSelect(allStations?.map(station => ({title: station.stationName, value: String(station.id)})))
+      setStationsForSelect(allStations?.map(station => (station.stationName)))
     }
   }, [allStations])
 
@@ -65,23 +67,37 @@ const SearchByRoute = ({setResultsData, allStations, navigateToMain}: Props) => 
   return (
 	<Container>
     <SelectorHeader>Станція</SelectorHeader>
-    <SelectorContainer>
-      <Selector
-        selectedValue={selectedStation ? String(selectedStation.id) : undefined} 
-        setSelectedValue={(id) => setSelectedStation(allStations.find(station => station.id === Number(id)))} 
-        items={stationsForSelect}
-        title='Станція'/>
-    </SelectorContainer>
-    <SelectorHeader>Маршрут</SelectorHeader>
-    <SelectorContainer>
-      <SearchField
-      title="Маршрут"
-      itemsForSearch={routesForSelect} 
-      selectedValue={selectedRoute ? selectedRoute : undefined} 
-      setSelectedValue={(value) => {
-        setSelectedRoute(value)
-      }}/>
-    </SelectorContainer>
+    { !selectedStation
+    ? <SelectorContainer>
+        <SearchFieldWithDropdown
+          title='Станція'
+          itemsForSearch={stationsForSelect}
+          setSearchedVale={(name) => setSelectedStation(allStations.find(station => station.stationName === name))} 
+          />
+      </SelectorContainer>
+    : <SelectedStationContainer>
+        <SelectedStation cancel={() => {
+        setSelectedStation(null)
+        setSelectedRoute(undefined)
+        }} 
+        name={selectedStation.stationName} 
+        />
+      </SelectedStationContainer>
+    }
+    {selectedStation && 
+    <>
+      <SelectorHeader>Маршрут</SelectorHeader>
+      <SelectorContainer>
+        <SearchField
+        title="Маршрут"
+        itemsForSearch={routesForSelect} 
+        selectedValue={selectedRoute ? selectedRoute : undefined} 
+        setSelectedValue={(value) => {
+          setSelectedRoute(value)
+        }}/>
+      </SelectorContainer>
+    </>
+    }
 	</Container>
   )
 }
@@ -99,6 +115,10 @@ font-weight: 700;
 color: #000;
 text-align: center;
 margin: 5px 0;
+`
+
+const SelectedStationContainer = styled.View`
+  padding: 0 5px;
 `
 
 

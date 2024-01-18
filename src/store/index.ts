@@ -1,5 +1,4 @@
 import {combineReducers, configureStore} from '@reduxjs/toolkit';
-import todoSlice from './slices/todo';
 import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
 import {
   persistStore,
@@ -21,7 +20,6 @@ const persistConfig = {
   whitelist: ['todos'],
 };
 const rootReducer = combineReducers({
-  todos: todoSlice,
   netInfo: netInfo,
   [stationApi.reducerPath]: stationApi.reducer,
 });

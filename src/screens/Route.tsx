@@ -37,8 +37,8 @@ const Route = ({route, navigation}: NativeStackScreenProps<RouteStackParamList, 
         console.log(pointLatLng, pointId, 'data')
     }
     useEffect(() => {
-        console.log('error', isError)
-    }, [error])
+        console.log('error', error)
+    }, [isError])
 
     if(data?.route?.points){
         let res: waypoint[] = (data.route.points.filter(i => i.fullAddress !== null).map((point) => {
