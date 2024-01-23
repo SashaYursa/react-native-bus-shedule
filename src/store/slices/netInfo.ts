@@ -1,26 +1,26 @@
-import {PayloadAction, createSlice} from '@reduxjs/toolkit';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 interface info {
-  isConnected: boolean;
+	isConnected: boolean;
 }
 
 interface infoState {
-  info: info;
+	info: info;
 }
 
 const initialState: infoState = {
-  info: {
-    isConnected: false,
-  },
+	info: {
+		isConnected: false,
+	},
 };
 
 const netInfo = createSlice({
-  name: 'netInfo',
-  initialState,
-  reducers: {
-    setInfo: (state, action: PayloadAction<info>) => {
-      state.info = action.payload;
-    },
-  },
+	name: 'netInfo',
+	initialState,
+	reducers: {
+		setInfo: (state, action: PayloadAction<info>) => {
+			state.info = action.payload;
+		},
+	},
 });
 export default netInfo.reducer;
-export const {setInfo} = netInfo.actions;
+export const { setInfo } = netInfo.actions;
