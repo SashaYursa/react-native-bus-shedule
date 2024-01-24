@@ -34,24 +34,24 @@ const StationShedule = ({
 		error: sheduleError,
 		isLoading: sheduleIsLoading,
 	} = useGetSheduleQuery(station.id);
-	const sheduleData = res?.buses;
+	const sheduleData = res?.shedule?.buses;
 	useEffect(() => {
-		if (res) {
-			const lastUpdateDate = new Date(res.station.last_updated_at);
+		if (res?.shedule) {
+			const lastUpdateDate = new Date(res.lastUpdate);
 			const lastUpdate = formattingDate(lastUpdateDate);
 			navigation.setOptions({
 				headerTitle: station.stationName,
 				headerRight: () => {
 					return (
 						<HeaderRightContainer>
-							{res.isUpdating && (
+							{res.isLoading && (
 								<HeaderUpdateContainer style={{ paddingRight: 5 }}>
 									<Animated.View style={{ transform: [{ rotate: spin }] }}>
 										<Icon name="loading" size={25} color="#000" />
 									</Animated.View>
 								</HeaderUpdateContainer>
 							)}
-							{res.isError ? (
+							{res.error ? (
 								<HeaderUpdateContainer>
 									<HeaderUpdateText style={{ color: 'red' }}>
 										Помилка{' '}

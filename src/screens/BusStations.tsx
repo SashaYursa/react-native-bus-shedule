@@ -21,6 +21,7 @@ const BusStations = ({
 		data: stations,
 		isLoading: stationsLoading,
 		error,
+		isError,
 		refetch,
 	} = useGetStationsQuery();
 	const [filteredStations, setFilteredStations] = useState(stations);
@@ -44,7 +45,9 @@ const BusStations = ({
 	}, [netInfo.isConnected]);
 
 	useEffect(() => {
-		console.log('error', error);
+		if (isError) {
+			console.log('error', error);
+		}
 	}, [error]);
 
 	useEffect(() => {
