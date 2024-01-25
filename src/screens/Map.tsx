@@ -18,6 +18,7 @@ import MapRouteList from '../components/MapRouteList';
 import { IBusRoute } from '../store/types';
 import ErrorLoad from '../components/ErrorLoad';
 import { sliceWaypointsArrayToConstLength } from '../utils/helpers';
+import Loading from '../components/Loading';
 
 export type mapPoint = {
 	isMissed: boolean;
@@ -46,12 +47,22 @@ const Map = ({
 	const [updateBusPoint, { data: updatePointData, error: updatePointError }] =
 		useUpdateBusStationPointMutation();
 	const mapRef = useRef<MapView | null>(null);
-	const [data, setData] = useState<IBusRoute | null>(null);
+	const data = response?.route;
+
 	useEffect(() => {
-		if (response?.res) {
-			setData(response?.res);
+		if (data?.route?.points) {
+			setPoints(
+				data.route?.points.map(point => {
+					const isMissed = !point.station.latitude && !point.latitude;
+					return {
+						id: point.id,
+						name: point.station.stationName,
+						isMissed,
+					};
+				}),
+			);
 		}
-	}, [response]);
+	}, [data]);
 
 	let waypoints: waypoints = null;
 
@@ -94,58 +105,26 @@ const Map = ({
 		}
 	}
 
-	let wayPointsForMiddleDirection: waypoint[] = [];
-	if (waypoints?.middle) {
-		console.log('rerender map');
-		wayPointsForMiddleDirection = sliceWaypointsArrayToConstLength(
-			waypoints?.middle,
-			23,
-		);
-	}
-
-	useEffect(() => {
-		if (data?.route) {
-			setPoints(
-				data.route?.points.map(point => {
-					const isMissed = !point.station.latitude && !point.latitude;
-					return {
-						id: point.id,
-						name: point.station.stationName,
-						isMissed,
-					};
-				}),
-			);
-		}
-	}, [data]);
+	const wayPointsForMiddleDirection: waypoint[] = waypoints?.middle
+		? sliceWaypointsArrayToConstLength(waypoints.middle, 23)
+		: [];
 
 	const moveToMarker = (id: number) => {
 		const findMarker = data?.route?.points.find(p => p.id === id);
 		mapRef.current?.fitToSuppliedMarkers([String(findMarker?.id)]);
 	};
 
+	if (isLoading) {
+		return <Loading />;
+	}
+
 	if (!waypoints?.first || !waypoints?.last) {
 		return (
-			<View
-				style={{
-					flex: 1,
-					backgroundColor: '#fff',
-					alignItems: 'center',
-					justifyContent: 'center',
-				}}>
-				<Text style={{ fontSize: 16, color: '#000', fontWeight: '700' }}>
-					Помилка
-				</Text>
-				<TouchableOpacity
-					onPress={() => navigation.goBack()}
-					style={{
-						marginTop: 10,
-						borderRadius: 12,
-						backgroundColor: '#000',
-						padding: 10,
-					}}>
-					<Text style={{ fontSize: 14, color: '#fff' }}>Назад</Text>
-				</TouchableOpacity>
-			</View>
+			<ErrorLoad
+				actionHandler={() => navigation.goBack()}
+				actionText="Назад"
+				errorText="Помилка при отриманні даних"
+			/>
 		);
 	}
 
@@ -299,7 +278,7 @@ const Map = ({
 					waypoints={wayPointsForMiddleDirection?.map(wp => wp.position)}
 					tappable={true}
 					onError={() => {
-						console.log('erorr in map view direction');
+						// console.log('erorr in map view direction');
 					}}
 				/>
 

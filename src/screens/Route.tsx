@@ -29,7 +29,7 @@ const Route = ({
 }: NativeStackScreenProps<RouteStackParamList, 'BusRoute'>) => {
 	const { id, busRoute } = route?.params;
 	const { data, isLoading, error, isError } = useGetRouteQuery(Number(id));
-	const routeData = data?.route ? data.route : null;
+	const routeData = data?.route?.route ? data.route.route : null;
 	useEffect(() => {
 		navigation.setOptions({
 			headerTitleStyle: {
@@ -38,10 +38,11 @@ const Route = ({
 			title: busRoute,
 		});
 	}, []);
+
 	let waypoints: waypoints = null;
 
-	if (routeData?.route?.points) {
-		let res: waypoint[] = routeData.route.points
+	if (routeData?.points) {
+		let res: waypoint[] = routeData.points
 			.filter(i => i.fullAddress !== null)
 			.map(point => {
 				if (point.latitude && point.longitude) {
@@ -106,8 +107,8 @@ const Route = ({
 	}
 	let firstDay = null;
 	let lastDay = null;
-	if (routeData?.route?.dates.dates?.length) {
-		const dates = routeData.route.dates.dates;
+	if (routeData?.dates.dates?.length) {
+		const dates = routeData.dates.dates;
 		let i = 0;
 		while (!firstDay) {
 			if (i > dates.length) {
@@ -143,7 +144,7 @@ const Route = ({
 
 	return (
 		<Container>
-			{routeData.route?.dates.dates.length ? (
+			{routeData.dates.dates.length ? (
 				<DatesContainer>
 					<View style={{ justifyContent: 'center', alignItems: 'center' }}>
 						<Text style={{ fontSize: 16, fontWeight: '700', color: '#000' }}>
@@ -159,7 +160,7 @@ const Route = ({
 							);
 						})}
 					</WeekContainer>
-					{routeData.route?.dates?.dates.map((week, index) => {
+					{routeData.dates?.dates.map((week, index) => {
 						return (
 							<WeekContainer key={index}>
 								{week.map((dayItem, index) => {
@@ -197,7 +198,7 @@ const Route = ({
 				</View>
 			)}
 			<RouteContainer>
-				{routeData.route?.points.map((point, index) => {
+				{routeData.points.map((point, index) => {
 					return (
 						<RouteItem key={point.station.stationName}>
 							<RouteLineContainer>
@@ -211,9 +212,7 @@ const Route = ({
 								<RouteLine
 									style={{
 										borderLeftWidth:
-											index === Number(routeData.route?.points.length) - 1
-												? 0
-												: 2,
+											index === Number(routeData.points.length) - 1 ? 0 : 2,
 									}}
 								/>
 							</RouteLineContainer>
@@ -280,11 +279,11 @@ const Route = ({
 					);
 				})}
 			</RouteContainer>
-			{waypoints && routeData.bus.id ? (
+			{waypoints && data?.busId ? (
 				<RouteMap
 					waypoints={waypoints}
 					navigateToMapScreen={() =>
-						navigation.navigate('Map', { busId: routeData.bus.id })
+						navigation.navigate('Map', { busId: data.busId })
 					}
 				/>
 			) : (

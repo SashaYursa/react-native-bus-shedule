@@ -145,10 +145,10 @@ export const stationApi = createApi({
 			query: (busId: number) => `/routes/${busId}`,
 			async onCacheEntryAdded(
 				busId,
-				{ updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch },
+				{ updateCachedData, cacheDataLoaded, cacheEntryRemoved },
 			) {
 				const data = (await cacheDataLoaded).data;
-				if (!data?.route) {
+				if (!data?.route?.route) {
 					socket.emit('route:fetch-route:server', { busId });
 					socket.on('route:fetch-route:client', (response: routeUpdate) => {
 						if (response.busId === busId) {
@@ -192,6 +192,7 @@ export const stationApi = createApi({
 				method: 'PUT',
 				body: data,
 			}),
+
 			invalidatesTags: ['route'],
 		}),
 	}),
