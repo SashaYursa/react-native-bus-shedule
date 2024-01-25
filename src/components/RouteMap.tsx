@@ -9,16 +9,10 @@ import { sliceWaypointsArrayToConstLength } from '../utils/helpers';
 
 type Props = {
 	waypoints: waypoints;
-	updateMapPoint: (pointLatLng: LatLng, pointId: number) => void;
 	navigateToMapScreen: () => void;
 };
 
-const RouteMap = ({
-	waypoints,
-	updateMapPoint,
-	navigateToMapScreen,
-}: Props) => {
-	// console.log('rerender map')
+const RouteMap = ({ waypoints, navigateToMapScreen }: Props) => {
 	if (!waypoints?.last || !waypoints.first) {
 		return (
 			<View>

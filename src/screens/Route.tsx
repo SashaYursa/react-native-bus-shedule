@@ -27,10 +27,9 @@ const Route = ({
 	route,
 	navigation,
 }: NativeStackScreenProps<RouteStackParamList, 'BusRoute'>) => {
-	console.log('rerender');
 	const { id, busRoute } = route?.params;
 	const { data, isLoading, error, isError } = useGetRouteQuery(Number(id));
-	const routeData = data?.res ? data.res : null;
+	const routeData = data?.route ? data.route : null;
 	useEffect(() => {
 		navigation.setOptions({
 			headerTitleStyle: {
@@ -40,12 +39,6 @@ const Route = ({
 		});
 	}, []);
 	let waypoints: waypoints = null;
-	const updateMapPoint = (
-		pointLatLng: { latitude: number; longitude: number },
-		pointId: number,
-	) => {
-		console.log(pointLatLng, pointId, 'data');
-	};
 
 	if (routeData?.route?.points) {
 		let res: waypoint[] = routeData.route.points
@@ -85,8 +78,8 @@ const Route = ({
 			waypoints = { first, middle: res, last };
 		}
 	}
-	if (isError) {
-		if ('status' in error) {
+	if (isError || data?.error) {
+		if (error && 'status' in error) {
 			return (
 				<ErrorLoad
 					actionHandler={() => navigation.goBack()}
@@ -290,7 +283,6 @@ const Route = ({
 			{waypoints && routeData.bus.id ? (
 				<RouteMap
 					waypoints={waypoints}
-					updateMapPoint={updateMapPoint}
 					navigateToMapScreen={() =>
 						navigation.navigate('Map', { busId: routeData.bus.id })
 					}

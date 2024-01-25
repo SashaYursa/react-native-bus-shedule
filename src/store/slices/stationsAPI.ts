@@ -22,7 +22,13 @@ type sheduleUpdate = {
 	isLoading?: boolean;
 };
 
-const UPDATE_SHEDULE_TIME = 10000; //ms
+type routeUpdate = {
+	route: IBusRoute | null;
+	error?: string;
+	busId: number;
+};
+
+const UPDATE_SHEDULE_TIME = 60000; //ms
 
 export const stationApi = createApi({
 	reducerPath: 'stationsApi',
@@ -46,34 +52,60 @@ export const stationApi = createApi({
 			) {
 				const result = await cacheDataLoaded;
 				let interval: number | null = null;
+				updateCachedData(data => {
+					return {
+						...data,
+						isLoading: true,
+					};
+				});
 				socket.emit('bus:update-shedule:server', {
 					busStationId: id,
 					lastUpdate: result.data.lastUpdate,
 				});
 				socket.on('bus:update-shedule:client', (response: sheduleUpdate) => {
-					if (interval) {
-						clearInterval(interval);
-					}
-
-					updateCachedData(() => response);
-					if (!response.error) {
-						interval = setInterval(
-							() => {
+					console.log('recive');
+					if (response.shedule?.station.id === id) {
+						if (interval) {
+							clearInterval(interval);
+						}
+						if (!response.error) {
+							updateCachedData(() => {
+								return {
+									...response,
+									isLoading: false,
+								};
+							});
+							interval = setInterval(() => {
 								updateCachedData(data => {
 									return {
 										...data,
 										isLoading: true,
 									};
 								});
+
 								socket.emit('bus:update-shedule:server', {
 									busStationId: id,
 									lastUpdate: response.lastUpdate,
 								});
-							},
-							response.error ? 1000 : UPDATE_SHEDULE_TIME,
-						);
+							}, UPDATE_SHEDULE_TIME);
+						} else {
+							updateCachedData(draft => {
+								return {
+									...draft,
+									isLoading: false,
+									error: response.error,
+								};
+							});
+							console.log('response error');
+						}
 					}
 				});
+				await cacheEntryRemoved;
+				if (interval) {
+					clearInterval(interval);
+				}
+				console.log('listener removed');
+				socket.removeListener('bus:update-shedule:client');
 
 				// socket.emit(
 				// 	'subscribeToUpdateShedule',
@@ -106,35 +138,28 @@ export const stationApi = createApi({
 				// 		});
 				// 	}
 				// });
-				await cacheEntryRemoved;
-				socket.removeListener('bus:update-shedule:client');
 			},
-			keepUnusedDataFor: 5,
+			keepUnusedDataFor: 0,
 		}),
-		getRoute: build.query<{ res: IBusRoute | null; error?: string }, number>({
+		getRoute: build.query<routeUpdate, number>({
 			query: (busId: number) => `/routes/${busId}`,
 			async onCacheEntryAdded(
 				busId,
 				{ updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch },
 			) {
 				const data = (await cacheDataLoaded).data;
-				if (!data?.res) {
+				if (!data?.route) {
 					socket.emit('route:fetch-route:server', { busId });
-					socket.on(
-						'route:fetch-route:client',
-						({ route, error }: { route: IBusRoute; error?: string }) => {
-							console.log(error, 'api error');
-							updateCachedData(() => ({
-								res: route,
-								error: error,
-							}));
-						},
-					);
+					socket.on('route:fetch-route:client', (response: routeUpdate) => {
+						if (response.busId === busId) {
+							updateCachedData(() => response);
+						}
+					});
 				}
 				await cacheEntryRemoved;
 				socket.removeListener('route:fetch-route:client');
 			},
-			keepUnusedDataFor: 5,
+			keepUnusedDataFor: 0,
 			providesTags: ['route'],
 		}),
 
