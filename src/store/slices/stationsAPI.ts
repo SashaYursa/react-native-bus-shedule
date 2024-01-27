@@ -28,6 +28,13 @@ type routeUpdate = {
 	busId: number;
 };
 
+export type busTime = {
+	id: number;
+	busInfo: string;
+	departure: number;
+	busRoute: string;
+};
+
 const UPDATE_SHEDULE_TIME = 60000; //ms
 
 export const stationApi = createApi({
@@ -150,12 +157,12 @@ export const stationApi = createApi({
 				const data = (await cacheDataLoaded).data;
 				if (!data?.route?.route) {
 					socket.emit('route:fetch-route:server', { busId });
-					socket.on('route:fetch-route:client', (response: routeUpdate) => {
-						if (response.busId === busId) {
-							updateCachedData(() => response);
-						}
-					});
 				}
+				socket.on('route:fetch-route:client', (response: routeUpdate) => {
+					if (response.busId === busId) {
+						updateCachedData(() => response);
+					}
+				});
 				await cacheEntryRemoved;
 				socket.removeListener('route:fetch-route:client');
 			},
@@ -195,6 +202,9 @@ export const stationApi = createApi({
 
 			invalidatesTags: ['route'],
 		}),
+		getStationTimes: build.query<busTime[], number>({
+			query: (stationId: number) => `/shedule/times/${stationId}`,
+		}),
 	}),
 });
 
@@ -209,4 +219,5 @@ export const {
 	useGetRouteQuery,
 	useAddBusStationLocationMutation,
 	useUpdateBusStationPointMutation,
+	useGetStationTimesQuery,
 } = stationApi;

@@ -20,6 +20,8 @@ import { IBusStations, ISheduleItem } from '../store/types';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MDIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import StationTimes from '../screens/StationTimes';
+import { TouchableOpacity, View } from 'react-native';
 
 type Props = {};
 
@@ -33,6 +35,7 @@ export type BusStackParamList = {
 	BusStations: undefined;
 	StationShedule: { station: IBusStations };
 	Route: NavigatorScreenParams<RouteStackParamList>;
+	StationTimes: { station: IBusStations };
 };
 export type BusFindStackParamList = {
 	SearchScreen: undefined;
@@ -40,7 +43,7 @@ export type BusFindStackParamList = {
 };
 
 export type RouteStackParamList = {
-	BusRoute: ISheduleItem;
+	BusRoute: { id: number; busRoute: string };
 	Map: { busId: number };
 };
 export type InfoParamList = {};
@@ -61,7 +64,19 @@ const BusSheduleNavigation = () => {
 			<StationStack.Screen
 				name="StationShedule"
 				component={StationShedule}
-				options={{ headerShown: true, headerTitle: '' }}
+				options={{
+					headerShown: true,
+					headerTitle: '',
+				}}
+			/>
+			<StationStack.Screen
+				name="StationTimes"
+				component={StationTimes}
+				options={{
+					headerShown: true,
+					headerTitle: '',
+					animation: 'slide_from_right',
+				}}
 			/>
 			<StationStack.Screen name="Route" component={RouteNavigation} />
 		</StationStack.Navigator>

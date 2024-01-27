@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View, StyleSheet } from 'react-native';
 import { RouteStackParamList } from '../navigation/Navigation';
 import { useGetRouteQuery } from '../store/slices/stationsAPI';
@@ -28,6 +28,8 @@ const Route = ({
 	navigation,
 }: NativeStackScreenProps<RouteStackParamList, 'BusRoute'>) => {
 	const { id, busRoute } = route?.params;
+	const [messagesAboutErrorSended, setMessagesAboutErrorSended] =
+		useState<boolean>(false);
 	const { data, isLoading, error, isError } = useGetRouteQuery(Number(id));
 	const routeData = data?.route?.route ? data.route.route : null;
 	useEffect(() => {
@@ -286,10 +288,17 @@ const Route = ({
 						navigation.navigate('Map', { busId: data.busId })
 					}
 				/>
+			) : !messagesAboutErrorSended ? (
+				<MapErrorContainer>
+					<MapErrorText>Наразі карта по цьому маршруту недоступна</MapErrorText>
+					<SendMapErrorButton onPress={() => setMessagesAboutErrorSended(true)}>
+						<ErrorButtonText>Повідомити про помилку</ErrorButtonText>
+					</SendMapErrorButton>
+				</MapErrorContainer>
 			) : (
-				<View>
-					<Text>sd</Text>
-				</View>
+				<MapErrorContainer>
+					<MapErrorText>Дякуємо за відгук</MapErrorText>
+				</MapErrorContainer>
 			)}
 		</Container>
 	);
@@ -382,6 +391,33 @@ const BusStopText = styled.Text`
 	font-size: 16px;
 	color: #000;
 	font-weight: 700;
+`;
+
+const MapErrorContainer = styled.View`
+	align-items: center;
+	justify-content: center;
+	flex-grow: 1;
+`;
+
+const MapErrorText = styled.Text`
+	font-size: 16px;
+	font-weight: 700;
+	color: #000;
+`;
+
+const SendMapErrorButton = styled.TouchableOpacity`
+	margin-top: 10px;
+	align-items: center;
+	justify-content: center;
+	align-items: center;
+	background-color: #000;
+	padding: 10px;
+	border-radius: 12px;
+`;
+const ErrorButtonText = styled.Text`
+	font-size: 14px;
+	font-weight: 400;
+	color: #fff;
 `;
 
 export default Route;

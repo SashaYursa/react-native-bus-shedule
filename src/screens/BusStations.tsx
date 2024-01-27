@@ -58,7 +58,9 @@ const BusStations = ({
 
 	const updateFilter = (value: string) => {
 		setFilteredStations(
-			stations?.filter(station => station.stationName.includes(value)),
+			stations?.filter(station =>
+				station.stationName.toUpperCase().includes(value.toUpperCase()),
+			),
 		);
 	};
 

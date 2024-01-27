@@ -189,7 +189,7 @@ const Map = ({
 			<ErrorLoad
 				actionHandler={() => navigation.goBack()}
 				actionText="Назад"
-				errorText="Помилка при даних"
+				errorText="Помилка при отриманні даних"
 			/>
 		);
 	}
