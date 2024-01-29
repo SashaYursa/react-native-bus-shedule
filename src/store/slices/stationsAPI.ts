@@ -193,7 +193,10 @@ export const stationApi = createApi({
 			}),
 			invalidatesTags: ['route'],
 		}),
-		updateBusStationPoint: build.mutation<string, addBusLocation>({
+		updateBusStationPointForCurrentRoute: build.mutation<
+			string,
+			addBusLocation
+		>({
 			query: ({ id, ...data }: addBusLocation) => ({
 				url: `/routes/point/${id}`,
 				method: 'PUT',
@@ -218,6 +221,6 @@ export const {
 	useGetSheduleQuery,
 	useGetRouteQuery,
 	useAddBusStationLocationMutation,
-	useUpdateBusStationPointMutation,
+	useUpdateBusStationPointForCurrentRouteMutation,
 	useGetStationTimesQuery,
 } = stationApi;

@@ -1,12 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import MapView, { LatLng, Region } from 'react-native-maps';
+import MapView, { Region } from 'react-native-maps';
 import styled from 'styled-components/native';
 import { RouteStackParamList } from '../navigation/Navigation';
 import {
 	useAddBusStationLocationMutation,
-	useUpdateBusStationPointMutation,
+	useUpdateBusStationPointForCurrentRouteMutation,
 	useGetRouteQuery,
 } from '../store/slices/stationsAPI';
 import MapViewDirections from 'react-native-maps-directions';
@@ -15,10 +14,11 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { waypoint, waypoints } from './Route';
 import MapMarker from '../components/MapMarker';
 import MapRouteList from '../components/MapRouteList';
-import { IBusRoute } from '../store/types';
 import ErrorLoad from '../components/ErrorLoad';
 import { sliceWaypointsArrayToConstLength } from '../utils/helpers';
 import Loading from '../components/Loading';
+import { point } from '../store/types';
+import CollapseError from '../components/CollapseError';
 
 export type mapPoint = {
 	isMissed: boolean;
@@ -33,19 +33,21 @@ const Map = ({
 	navigation,
 }: NativeStackScreenProps<RouteStackParamList, 'Map'>) => {
 	const { busId } = route.params;
-	const { isLoading, error, isError, data: response } = useGetRouteQuery(busId);
-	const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
+	const { isLoading, isError, data: response } = useGetRouteQuery(busId);
+	const [selectedMarker, setSelectedMarker] = useState<point | null>(null);
 	const [points, setPoints] = useState<mapPoint[]>([]);
-	const [currentAddPointId, setCurrentAddPointId] = useState<number | null>(
+	const [newMapPointRegion, setNewMapPointRegion] = useState<Region | null>(
 		null,
 	);
-	const [createMapPosition, setCreateMapPosition] = useState<Region | null>(
-		null,
-	);
-	const [addBusStationLocation, { data: addData, error: addError }] =
-		useAddBusStationLocationMutation();
-	const [updateBusPoint, { data: updatePointData, error: updatePointError }] =
-		useUpdateBusStationPointMutation();
+
+	const [
+		addBusStationLocation,
+		{ data: addData, error: addError, isError: addHasError },
+	] = useAddBusStationLocationMutation();
+	const [
+		updateBusStationLocationForCurrentRoute,
+		{ data: updatePointData, error: updatePointError, isError: updateHasError },
+	] = useUpdateBusStationPointForCurrentRouteMutation();
 	const mapRef = useRef<MapView | null>(null);
 	const data = response?.route;
 
@@ -105,6 +107,13 @@ const Map = ({
 		}
 	}
 
+	const setSelectedMarkerHandler = (id: number) => {
+		const findMarker = data?.route?.points.find(point => point.id === id);
+		if (findMarker) {
+			setSelectedMarker(findMarker);
+		}
+	};
+
 	const wayPointsForMiddleDirection: waypoint[] = waypoints?.middle
 		? sliceWaypointsArrayToConstLength(waypoints.middle, 23)
 		: [];
@@ -114,76 +123,36 @@ const Map = ({
 		mapRef.current?.fitToSuppliedMarkers([String(findMarker?.id)]);
 	};
 
+	const updateMapPoint = () => {
+		if (newMapPointRegion && selectedMarker) {
+			console.log({ newMapPointRegion }, '   ', selectedMarker);
+			if (!selectedMarker.latitude && !selectedMarker.station.latitude) {
+				addBusStationLocation({
+					id: selectedMarker.station.id,
+					latitude: newMapPointRegion.latitude,
+					longitude: newMapPointRegion.longitude,
+				});
+			} else {
+				updateBusStationLocationForCurrentRoute({
+					id: selectedMarker.id,
+					latitude: newMapPointRegion.latitude,
+					longitude: newMapPointRegion.longitude,
+				});
+			}
+			setSelectedMarker(null);
+		} else {
+			console.log('no new point region in Map->updateMapPointRegion');
+		}
+	};
+	const cancelCreateMapPoint = () => {
+		setNewMapPointRegion(null);
+		setSelectedMarker(null);
+	};
+
 	if (isLoading) {
 		return <Loading />;
 	}
 
-	if (!waypoints?.first || !waypoints?.last) {
-		return (
-			<ErrorLoad
-				actionHandler={() => navigation.goBack()}
-				actionText="Назад"
-				errorText="Помилка при отриманні даних"
-			/>
-		);
-	}
-
-	const updateMapPoint = (newPosition: LatLng, pointId: number) => {
-		if (!currentAddPointId) {
-			updateBusPoint({
-				id: pointId,
-				latitude: newPosition.latitude,
-				longitude: newPosition.longitude,
-			});
-			setSelectedMarker(null);
-		}
-	};
-
-	const addMapPointAction = (id: number) => {
-		setSelectedMarker(id);
-		setCurrentAddPointId(id);
-	};
-
-	const createMapPoint = () => {
-		const findStation = data?.route?.points.find(p => p.id === selectedMarker);
-		if (findStation && createMapPosition) {
-			addBusStationLocation({
-				id: findStation?.station.id,
-				latitude: createMapPosition?.latitude,
-				longitude: createMapPosition?.longitude,
-			});
-		}
-		setCurrentAddPointId(null);
-		setCreateMapPosition(null);
-		setSelectedMarker(null);
-	};
-	const cancelCreateMapPoint = () => {
-		setCurrentAddPointId(null);
-		setCreateMapPosition(null);
-		setSelectedMarker(null);
-	};
-
-	const setCreateMapPointRegion = (region: Region) => {
-		if (currentAddPointId) {
-			setCreateMapPosition(region);
-		}
-	};
-
-	const handleSetSelectedMarker = (marker: number) => {
-		if (!currentAddPointId) {
-			setSelectedMarker(marker);
-		}
-	};
-
-	if (!waypoints?.first || !waypoints.last || !waypoints.middle) {
-		return (
-			<ErrorLoad
-				actionHandler={() => navigation.goBack()}
-				actionText="Назад"
-				errorText="Помилка при отриманні маршруту"
-			/>
-		);
-	}
 	if (isError) {
 		return (
 			<ErrorLoad
@@ -194,62 +163,49 @@ const Map = ({
 		);
 	}
 
+	if (!waypoints?.first || !waypoints.last || !waypoints.middle) {
+		return (
+			<ErrorLoad
+				actionHandler={() => navigation.goBack()}
+				actionText="Назад"
+				errorText="Помилка при отриманні маршруту"
+			/>
+		);
+	}
+
 	return (
 		<Container>
-			{!currentAddPointId ? (
+			<CollapseError
+				showError={!!addHasError || !!updateHasError}
+				message={
+					!!addHasError
+						? 'Помилка, точку не додано'
+						: 'Помилка, точку не оновлено'
+				}
+			/>
+			{!selectedMarker ? (
 				<MapRouteList
-					addMarker={addMapPointAction}
+					addMarker={setSelectedMarkerHandler}
 					moveToMarker={moveToMarker}
 					points={points}
 				/>
 			) : (
 				<>
-					<TouchableOpacity
-						style={{
-							position: 'absolute',
-							bottom: 30,
-							left: 10,
-							padding: 10,
-							zIndex: 10,
-							borderRadius: 12,
-							backgroundColor: '#0F0F0F',
-						}}
-						onPress={createMapPoint}>
-						<Text
-							style={{
-								textAlign: 'center',
-								fontSize: 16,
-								fontWeight: '700',
-								color: '#fff',
-							}}>
-							Зберегти
-						</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}
-						onPress={cancelCreateMapPoint}>
+					<ActionEditPointButton onPress={updateMapPoint}>
+						<EditPointButtonText>Зберегти</EditPointButtonText>
+					</ActionEditPointButton>
+					<CancelEditPointButton onPress={cancelCreateMapPoint}>
 						<Icon name="close-circle-outline" size={30} color="red" />
-					</TouchableOpacity>
+					</CancelEditPointButton>
+					<EditPointContainer pointerEvents={'none'}>
+						<Icon
+							name="map-marker-down"
+							style={{ transform: [{ translateY: -15 }] }}
+							color={'red'}
+							size={30}
+						/>
+					</EditPointContainer>
 				</>
-			)}
-			{currentAddPointId !== null && (
-				<View
-					pointerEvents={'none'}
-					style={{
-						position: 'absolute',
-						width: '100%',
-						height: '100%',
-						zIndex: 5,
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}>
-					<Icon
-						name="map-marker-down"
-						style={{ transform: [{ translateY: -15 }] }}
-						color={'red'}
-						size={30}
-					/>
-				</View>
 			)}
 			<MapView
 				style={{ width: '100%', height: '100%' }}
@@ -259,7 +215,7 @@ const Map = ({
 					latitudeDelta: 0.2,
 					longitudeDelta: 0.2,
 				}}
-				onRegionChangeComplete={region => setCreateMapPointRegion(region)}
+				onRegionChangeComplete={region => setNewMapPointRegion(region)}
 				onLayout={() => {
 					if (waypoints?.first.position && waypoints.last.position) {
 						mapRef.current?.fitToCoordinates([
@@ -277,17 +233,15 @@ const Map = ({
 					strokeWidth={3}
 					waypoints={wayPointsForMiddleDirection?.map(wp => wp.position)}
 					tappable={true}
-					onError={() => {
-						// console.log('erorr in map view direction');
-					}}
+					onError={() => {}}
 				/>
 
 				<MapMarker
 					id={waypoints.first.id}
-					isSelected={selectedMarker === waypoints.first.id}
+					isSelected={selectedMarker?.id === waypoints.first.id}
 					name={waypoints.first.name}
-					setSelectedMarker={handleSetSelectedMarker}
-					savePosition={updateMapPoint}
+					setSelectedMarker={setSelectedMarkerHandler}
+					removeSelectedMarker={() => setSelectedMarker(null)}
 					position={waypoints.first.position}
 					icon={require('../assets/bus-station.png')}
 				/>
@@ -297,9 +251,9 @@ const Map = ({
 						id={waypoint.id}
 						name={waypoint.name}
 						position={waypoint.position}
-						isSelected={selectedMarker === waypoint.id}
-						setSelectedMarker={handleSetSelectedMarker}
-						savePosition={updateMapPoint}
+						isSelected={selectedMarker?.id === waypoint.id}
+						setSelectedMarker={setSelectedMarkerHandler}
+						removeSelectedMarker={() => setSelectedMarker(null)}
 						key={index}
 						icon={require('../assets/pin.png')}
 					/>
@@ -307,10 +261,10 @@ const Map = ({
 
 				<MapMarker
 					id={waypoints.last.id}
-					isSelected={selectedMarker === waypoints.last.id}
+					isSelected={selectedMarker?.id === waypoints.last.id}
 					name={waypoints.last.name}
-					setSelectedMarker={handleSetSelectedMarker}
-					savePosition={updateMapPoint}
+					setSelectedMarker={setSelectedMarkerHandler}
+					removeSelectedMarker={() => setSelectedMarker(null)}
 					position={waypoints.last.position}
 					icon={require('../assets/bus-station.png')}
 				/>
@@ -321,6 +275,37 @@ const Map = ({
 const Container = styled.View`
 	flex-grow: 1;
 	position: relative;
+`;
+
+const CancelEditPointButton = styled.TouchableOpacity`
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 2;
+`;
+const ActionEditPointButton = styled.TouchableOpacity`
+	position: absolute;
+	bottom: 30px;
+	left: 10px;
+	padding: 10px;
+	border-radius: 12px;
+	background-color: #0f0f0f;
+	z-index: 2;
+`;
+const EditPointButtonText = styled.Text`
+	text-align: center;
+	font-size: 16px;
+	font-weight: 700;
+	color: #fff;
+`;
+
+const EditPointContainer = styled.View`
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 2;
+	align-items: center;
+	justify-content: center;
 `;
 
 export default Map;

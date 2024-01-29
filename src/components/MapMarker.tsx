@@ -15,8 +15,8 @@ type Props = {
 	position: LatLng;
 	id: number;
 	icon: ImageURISource;
-	savePosition: (newPosition: LatLng, pointId: number) => void;
 	setSelectedMarker: (id: number) => void;
+	removeSelectedMarker: () => void;
 };
 
 const MapMarker = ({
@@ -25,27 +25,20 @@ const MapMarker = ({
 	position,
 	id,
 	icon,
-	savePosition,
 	setSelectedMarker,
+	removeSelectedMarker,
 }: Props) => {
-	// console.log(isSelected)
 	const markerRef = useRef<NativeMapMarker>(null);
 
 	useEffect(() => {
 		if (markerRef) {
 			markerRef.current?.hideCallout();
-			// console.log('redraw')
 		}
 	}, [markerRef, isSelected]);
 
 	const calloutAction = (e: CalloutPressEvent) => {
 		if (isSelected) {
-			if (
-				e.nativeEvent.coordinate?.latitude &&
-				e.nativeEvent.coordinate?.longitude
-			) {
-				savePosition(e.nativeEvent.coordinate, id);
-			}
+			removeSelectedMarker();
 		} else {
 			setSelectedMarker(id);
 		}
@@ -56,7 +49,7 @@ const MapMarker = ({
 			title={name}
 			identifier={String(id)}
 			coordinate={position}
-			draggable={isSelected}
+			draggable={false}
 			ref={markerRef}
 			tracksViewChanges={false}
 			icon={!isSelected ? icon : 0}>
@@ -70,7 +63,7 @@ const MapMarker = ({
 				</Text>
 				<MarkerButton>
 					<Text style={{ color: '#fff' }}>
-						{isSelected ? 'Зберегти' : 'Перемістити точку'}
+						{isSelected ? 'Скасувати' : 'Перемістити точку'}
 					</Text>
 				</MarkerButton>
 			</Callout>

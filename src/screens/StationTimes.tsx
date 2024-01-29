@@ -78,7 +78,7 @@ const StationTimes = ({
 
 	return data?.length ? (
 		<FlashList
-			estimatedItemSize={80}
+			estimatedItemSize={81}
 			renderItem={({ item, index }) => _renderItem(item, index)}
 			data={data}
 			refreshing={isRefreshing}
