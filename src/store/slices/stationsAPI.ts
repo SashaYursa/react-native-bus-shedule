@@ -7,6 +7,7 @@ import {
 } from '../types';
 import { DEFAULT_API_URL } from '../../utils/constants';
 import socket from '../../socket';
+import { addTime } from './stationTimesSlice';
 
 interface addBusLocation {
 	id: number;
@@ -111,40 +112,7 @@ export const stationApi = createApi({
 				if (interval) {
 					clearInterval(interval);
 				}
-				console.log('listener removed');
 				socket.removeListener('bus:update-shedule:client');
-
-				// socket.emit(
-				// 	'subscribeToUpdateShedule',
-				// 	socket.id,
-				// 	id,
-				// 	(res: { status: 'ok' | 'error' }) => {
-				// 		if (res.status === 'ok') {
-				// 		}
-				// 	},
-				// );
-				// socket.on('startUpdate', () => {
-				// 	updateCachedData(draft => {
-				// 		return { ...draft, isUpdating: true };
-				// 	});
-				// });
-				// socket.on('update', (data: any) => {
-				// 	if (data != null) {
-				// 		updateCachedData(() => data);
-				// 	} else {
-				// 		updateCachedData(draft => {
-				// 			return draft.isUpdating ? { ...draft, isUpdating: false } : draft;
-				// 		});
-				// 	}
-				// });
-				// socket.on('error', (data: any) => {
-				// 	if (data?.statusCode === 500) {
-				// 		updateCachedData(draft => {
-				// 			console.log('error');
-				// 			return { ...draft, isError: true, isUpdating: true };
-				// 		});
-				// 	}
-				// });
 			},
 			keepUnusedDataFor: 0,
 		}),
@@ -207,6 +175,13 @@ export const stationApi = createApi({
 		}),
 		getStationTimes: build.query<busTime[], number>({
 			query: (stationId: number) => `/shedule/times/${stationId}`,
+			async onCacheEntryAdded(
+				arg,
+				{ cacheDataLoaded, cacheEntryRemoved, dispatch },
+			) {
+				const res = await cacheDataLoaded;
+				dispatch(addTime({ routes: res.data, stationId: arg }));
+			},
 		}),
 	}),
 });
@@ -223,4 +198,5 @@ export const {
 	useAddBusStationLocationMutation,
 	useUpdateBusStationPointForCurrentRouteMutation,
 	useGetStationTimesQuery,
+	useLazyGetStationTimesQuery,
 } = stationApi;

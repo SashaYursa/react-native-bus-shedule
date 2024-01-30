@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Text, View, Animated } from 'react-native';
-import { useGetStationsQuery } from '../store/slices/stationsAPI';
+import { useLazyGetStationsQuery } from '../store/slices/stationsAPI';
 import styled from 'styled-components/native';
 import { IBusStations } from '../store/types';
 import Search from '../components/Search';
@@ -10,6 +10,7 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import BusStation from '../components/busStation';
 import Loading from '../components/Loading';
 import { FlashList } from '@shopify/flash-list';
+import { useAppSelector } from '../store';
 
 const HEADER_HEIGHT = 60;
 
@@ -17,13 +18,10 @@ const BusStations = ({
 	navigation,
 }: NativeStackScreenProps<BusStackParamList, 'BusStations'>) => {
 	const netInfo = useNetInfo();
-	const {
-		data: stations,
-		isLoading: stationsLoading,
-		error,
-		isError,
-		refetch,
-	} = useGetStationsQuery();
+	const stations = useAppSelector(state => state.busStations);
+
+	const [getStations, { isError, isFetching, error }] =
+		useLazyGetStationsQuery();
 	const [filteredStations, setFilteredStations] = useState(stations);
 	const [searchFieldIsFocused, setSearchFieldIsFocused] =
 		useState<boolean>(false);
@@ -38,23 +36,14 @@ const BusStations = ({
 		}),
 	).current;
 
-	useEffect(() => {
-		if (netInfo.isConnected) {
-			refetch();
-		}
-	}, [netInfo.isConnected]);
+	if (netInfo.isConnected && !stations.length) {
+		console.log('need to fetch');
+		getStations();
+	}
 
-	useEffect(() => {
-		if (isError) {
-			console.log('error', error);
-		}
-	}, [error]);
-
-	useEffect(() => {
-		if (stations) {
-			setFilteredStations(stations);
-		}
-	}, [stations]);
+	if (isError) {
+		console.log('error ---> ', error);
+	}
 
 	const updateFilter = (value: string) => {
 		setFilteredStations(
@@ -65,7 +54,10 @@ const BusStations = ({
 	};
 
 	const moveToStationShedule = (station: IBusStations) => {
-		navigation.navigate('StationShedule', { station });
+		navigation.navigate(
+			netInfo.isConnected ? 'StationShedule' : 'StationTimes',
+			{ station },
+		);
 	};
 
 	const _renderItem = (item: IBusStations) => {
@@ -74,7 +66,7 @@ const BusStations = ({
 		);
 	};
 
-	if (stationsLoading) {
+	if (isFetching) {
 		return <Loading />;
 	}
 

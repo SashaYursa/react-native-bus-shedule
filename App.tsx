@@ -1,4 +1,5 @@
 import React from 'react';
+import { Text, View } from 'react-native';
 import Navigation from './src/navigation/Navigation';
 import { Provider } from 'react-redux';
 import { persistor, store } from './src/store';
