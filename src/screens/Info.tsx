@@ -3,7 +3,9 @@ import { Linking } from 'react-native';
 import Accordion from 'react-native-collapsible/Accordion';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import PrivacyPolicy from '../utils/privacyPolicy';
+import Disclaimer from '../utils/disclaimer';
+import disclaimer from '../utils/disclaimer';
 type Props = {};
 type section = {
 	title: string;
@@ -14,22 +16,16 @@ const SECTIONS: section[] = [
 	{
 		icon: 'police-badge',
 		title: 'Політика конфіденційності',
-		content:
-			'Lorem, ipsum dolor sit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicingsit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptasLorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptas architecto, molestiae tenetur, adipisci et dolores in debitis sunt est porro laboriosam sequi, ipsam iste blanditiis totam error repudiandae! Eius rerum, libero tenetur accusantium itaque cumque reprehenderit voluptatum odit quasi qui nemo, voluptate velit eligendi labore quibusdam non animi esse iusto totam! Eaque nulla qui quos architecto dolor sed saepe autem mollitia impedit cumque voluptatum consectetur magni inventore ex quae natus numquam, sint ratione. In excepturi veniam, et porro sapiente similique cum, pariatur illo nihil molestias quia quis numquam dolorem quibusdam temporibus! Nisi dolores enim molestias quaerat quisquam sint.',
+		content: PrivacyPolicy.text,
 	},
 	{
 		icon: 'alert-circle',
 		title: 'Дисклеймер',
-		content:
-			'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi minus voluptas architecto, molestiae tenetur, adipisci et dolores in debitis sunt est porro laboriosam sequi, ipsam iste blanditiis totam error repudiandae! Eius rerum, libero tenetur accusantium itaque cumque reprehenderit voluptatum odit quasi qui nemo, voluptate velit eligendi labore quibusdam non animi esse iusto totam! Eaque nulla qui quos architecto dolor sed saepe autem mollitia impedit cumque voluptatum consectetur magni inventore ex quae natus numquam, sint ratione. In excepturi veniam, et porro sapiente similique cum, pariatur illo nihil molestias quia quis numquam dolorem quibusdam temporibus! Nisi dolores enim molestias quaerat quisquam sint.',
+		content: disclaimer.text,
 	},
 ];
 const Info = (props: Props) => {
 	const [activeSection, setActiveSection] = useState<number[]>([]);
-
-	const renderSectionTitle = () => {
-		return <></>;
-	};
 
 	const renderHeader = (
 		{ title, icon }: section,
@@ -59,7 +55,6 @@ const Info = (props: Props) => {
 				<Accordion
 					activeSections={activeSection}
 					sections={SECTIONS}
-					renderSectionTitle={renderSectionTitle}
 					renderHeader={renderHeader}
 					renderContent={renderContent}
 					onChange={indexes => setActiveSection(indexes)}
@@ -78,7 +73,7 @@ const Info = (props: Props) => {
 				onPress={() => {
 					Linking.openURL('mailto:sasha.yursa13@gmail.com');
 				}}>
-				<SendEmailText>Зв'язатися з автором</SendEmailText>
+				<SendEmailText>Зв'язатись з автором</SendEmailText>
 			</SendEmailButton>
 		</Container>
 	);
@@ -126,11 +121,12 @@ const AccordionBody = styled.ScrollView`
 	border-radius: 0 0 12px 12px;
 	margin-left: 10px;
 	margin-right: 10px;
-	height: 200px;
+	height: 400px;
 `;
 
 const BodyText = styled.Text`
-	font-size: 14px;
+	font-size: 16px;
+	text-align: justify;
 	color: #000;
 `;
 

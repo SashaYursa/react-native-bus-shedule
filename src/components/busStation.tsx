@@ -3,14 +3,17 @@ import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { formattingDate } from '../utils/helpers';
 import { IBusStations } from '../store/types';
+import { Text, View } from 'react-native';
 
 type Props = {
 	station: IBusStations;
 	moveToStationShedule: (station: IBusStations) => void;
+	searchValue?: string;
 };
 
-const BusStation = ({ station, moveToStationShedule }: Props) => {
+const BusStation = ({ station, moveToStationShedule, searchValue }: Props) => {
 	const lastUpdate = formattingDate(new Date(station.last_updated_at));
+
 	return (
 		<BusStationButton
 			onPress={() => {
@@ -20,7 +23,13 @@ const BusStation = ({ station, moveToStationShedule }: Props) => {
 				<Icon name="bus-multiple" size={50} />
 			</BusStationIcon>
 			<BusStationInfo>
-				<BusStationTitle>{station.stationName}</BusStationTitle>
+				<BusStationTitle>
+					{searchValue ? (
+						<StationName name={station.stationName} searchValue={searchValue} />
+					) : (
+						<BusStationTitle>{station.stationName}</BusStationTitle>
+					)}
+				</BusStationTitle>
 				<BusStationInfoContainer>
 					<Icon name="update" size={18} />
 					<LastUpdateStationText>Оновлено: {lastUpdate}</LastUpdateStationText>
@@ -37,7 +46,47 @@ const BusStation = ({ station, moveToStationShedule }: Props) => {
 		</BusStationButton>
 	);
 };
-
+const StationName = ({
+	name,
+	searchValue,
+}: {
+	name: string;
+	searchValue: string;
+}) => {
+	const nameArray = name.toUpperCase().split('');
+	const searchArray = searchValue.toUpperCase().split('');
+	const startIndex = nameArray.findIndex((letter, index, arr) => {
+		if (letter === searchArray[0]) {
+			for (let i = 1; i < searchArray.length; i++) {
+				if (searchArray[i] !== arr[index + i]) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	});
+	return (
+		<BusStationTitle>
+			{nameArray.map((nameLetter, index) => {
+				return (
+					<BusStationTitle
+						key={index}
+						style={
+							index >= startIndex && index < startIndex + searchArray.length
+								? {
+										backgroundColor: '#41b874',
+								  }
+								: {}
+						}>
+						{nameLetter}
+					</BusStationTitle>
+				);
+			})}
+		</BusStationTitle>
+	);
+};
 const BusStationButton = styled.TouchableOpacity`
 	flex-direction: row;
 	justify-content: space-between;

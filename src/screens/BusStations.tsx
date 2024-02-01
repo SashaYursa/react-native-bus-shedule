@@ -14,6 +14,7 @@ import BusStation from '../components/busStation';
 import Loading from '../components/Loading';
 import { FlashList } from '@shopify/flash-list';
 import { useAppSelector } from '../store';
+import { setStations } from '../store/slices/busStationsSlice';
 
 const HEADER_HEIGHT = 60;
 
@@ -32,6 +33,7 @@ const BusStations = ({
 	const [getStations, { isError, isFetching, error }] =
 		useLazyGetStationsQuery();
 	const [filteredStations, setFilteredStations] = useState(stations);
+	const [searchVal, setSearchVal] = useState<string>('');
 	const [searchFieldIsFocused, setSearchFieldIsFocused] =
 		useState<boolean>(false);
 	const scrollY = useRef(new Animated.Value(0));
@@ -63,11 +65,17 @@ const BusStations = ({
 	}
 
 	const updateFilter = (value: string) => {
-		setFilteredStations(
-			stations?.filter(station =>
-				station.stationName.toUpperCase().includes(value.toUpperCase()),
-			),
-		);
+		if (value.length > 2) {
+			setFilteredStations(
+				stations?.filter(station =>
+					station.stationName.toUpperCase().includes(value.toUpperCase()),
+				),
+			);
+			setSearchVal(value);
+		} else {
+			setSearchVal('');
+			setFilteredStations(stations);
+		}
 	};
 
 	const moveToStationShedule = (station: IBusStations) => {
@@ -78,7 +86,13 @@ const BusStations = ({
 	};
 
 	const _renderItem = (item: IBusStations) => {
-		return (
+		return searchVal ? (
+			<BusStation
+				station={item}
+				moveToStationShedule={moveToStationShedule}
+				searchValue={searchVal}
+			/>
+		) : (
 			<BusStation station={item} moveToStationShedule={moveToStationShedule} />
 		);
 	};

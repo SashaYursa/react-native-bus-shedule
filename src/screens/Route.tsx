@@ -290,7 +290,7 @@ const Route = ({
 				/>
 			) : !messagesAboutErrorSended ? (
 				<MapErrorContainer>
-					<MapErrorText>Наразі карта по цьому маршруту недоступна</MapErrorText>
+					<MapErrorText>Наразі карта для даного маршруту недоступна</MapErrorText>
 					<SendMapErrorButton onPress={() => setMessagesAboutErrorSended(true)}>
 						<ErrorButtonText>Повідомити про помилку</ErrorButtonText>
 					</SendMapErrorButton>

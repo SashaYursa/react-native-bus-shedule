@@ -1,30 +1,30 @@
-import React, { useEffect, useRef } from 'react';
-import { ImageURISource, Text, View } from 'react-native';
+import React, { PropsWithChildren, useEffect, useRef } from 'react';
+import { Image, ImageURISource, Text, View } from 'react-native';
 import {
 	Callout,
 	CalloutPressEvent,
 	LatLng,
 	MapMarker as NativeMapMarker,
 	Marker,
+	CalloutSubview,
 } from 'react-native-maps';
 import styled from 'styled-components/native';
 
-type Props = {
-	isSelected: boolean;
+type Props = PropsWithChildren<{
+	id: number;
 	name: string;
 	position: LatLng;
-	id: number;
-	icon: ImageURISource;
-	setSelectedMarker: (id: number) => void;
-	removeSelectedMarker: () => void;
-};
+	isSelected?: boolean;
+	setSelectedMarker?: (id: number) => void;
+	removeSelectedMarker?: () => void;
+}>;
 
 const MapMarker = ({
-	isSelected,
+	children,
 	name,
 	position,
 	id,
-	icon,
+	isSelected,
 	setSelectedMarker,
 	removeSelectedMarker,
 }: Props) => {
@@ -36,37 +36,42 @@ const MapMarker = ({
 		}
 	}, [markerRef, isSelected]);
 
-	const calloutAction = (e: CalloutPressEvent) => {
-		if (isSelected) {
-			removeSelectedMarker();
-		} else {
-			setSelectedMarker(id);
+	const calloutAction = () => {
+		if (setSelectedMarker && removeSelectedMarker) {
+			if (isSelected) {
+				removeSelectedMarker();
+			} else {
+				setSelectedMarker(id);
+			}
 		}
 	};
 
 	return (
 		<Marker
+			style={{ position: 'relative' }}
 			title={name}
 			identifier={String(id)}
 			coordinate={position}
 			draggable={false}
 			ref={markerRef}
-			tracksViewChanges={false}
-			icon={!isSelected ? icon : 0}>
-			<Callout
-				onPress={e => {
-					calloutAction(e);
-				}}
-				tooltip={true}>
-				<Text style={{ fontSize: 14, color: '#000', fontWeight: '700' }}>
-					{name}
-				</Text>
-				<MarkerButton>
-					<Text style={{ color: '#fff' }}>
-						{isSelected ? 'Скасувати' : 'Перемістити точку'}
-					</Text>
-				</MarkerButton>
-			</Callout>
+			tracksViewChanges={false}>
+			<MarkerIconContainer>{children}</MarkerIconContainer>
+			{typeof isSelected === 'boolean' && (
+				<Callout
+					onPress={calloutAction}
+					style={{
+						justifyContent: 'flex-end',
+						height: 40,
+					}}
+					tooltip={true}>
+					<StationName>{name}</StationName>
+					<MarkerButton>
+						<CalloutActionText>
+							{isSelected ? 'Скасувати' : 'Перемістити точку'}
+						</CalloutActionText>
+					</MarkerButton>
+				</Callout>
+			)}
 		</Marker>
 	);
 };
@@ -80,6 +85,22 @@ const MarkerButton = styled.View`
 	padding-right: 5px;
 	border-radius: 12px;
 	width: 200px;
+`;
+
+const MarkerIconContainer = styled.View`
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-end;
+	height: 30px;
+`;
+
+const StationName = styled.Text`
+	font-size: 14px;
+	color: #000;
+	font-weight: 700;
+`;
+const CalloutActionText = styled.Text`
+	color: #fff;
 `;
 
 export default MapMarker;

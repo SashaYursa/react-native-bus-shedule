@@ -1,11 +1,12 @@
-import { View, Text } from 'react-native';
-import React from 'react';
+import { View, Text, Image } from 'react-native';
+import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import MapView, { LatLng, Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { waypoint, waypoints } from '../screens/Route';
 import Config from 'react-native-config';
 import { sliceWaypointsArrayToConstLength } from '../utils/helpers';
+import MapMarker from './MapMarker';
 
 type Props = {
 	waypoints: waypoints;
@@ -31,8 +32,13 @@ const RouteMap = ({ waypoints, navigateToMapScreen }: Props) => {
 	return (
 		<MapContainer>
 			<MapView
-				style={{ width: '100%', height: '100%' }}
-				onPress={navigateToMapScreen}
+				style={{
+					width: '100%',
+					height: '100%',
+				}}
+				onPress={() => {
+					navigateToMapScreen();
+				}}
 				initialRegion={{
 					latitude: waypoints.first.position.latitude,
 					longitude: waypoints.first.position.longitude,
@@ -55,26 +61,29 @@ const RouteMap = ({ waypoints, navigateToMapScreen }: Props) => {
 					tappable={true}
 					// precision='high'
 				/>
-				<Marker
-					icon={require('../assets/bus-station.png')}
-					title={waypoints.first.name}
-					coordinate={waypoints.first.position}
-				/>
+				<MapMarker
+					id={waypoints.first.id}
+					name={waypoints.first.name}
+					position={waypoints.first.position}>
+					<MarkerImage source={require('../assets/bus-station.png')} />
+				</MapMarker>
 				{waypoints?.middle?.map((waypoint, index) => {
 					return (
-						<Marker
+						<MapMarker
 							key={`${waypoint.position.latitude}${waypoint.position.longitude}${index}`}
-							icon={require('../assets/pin.png')}
-							title={waypoint.name}
-							coordinate={waypoint.position}
-						/>
+							id={waypoint.id}
+							name={waypoint.name}
+							position={waypoint.position}>
+							<MarkerImage source={require('../assets/pin.png')} />
+						</MapMarker>
 					);
 				})}
-				<Marker
-					icon={require('../assets/bus-station.png')}
-					title={waypoints.last.name}
-					coordinate={waypoints.last.position}
-				/>
+				<MapMarker
+					id={waypoints.last.id}
+					name={waypoints.last.name}
+					position={waypoints.last.position}>
+					<MarkerImage source={require('../assets/bus-station.png')} />
+				</MapMarker>
 			</MapView>
 		</MapContainer>
 	);
@@ -90,6 +99,11 @@ const MapContainer = styled.View`
 	overflow: hidden;
 	border-color: 1px;
 	margin-bottom: 20px;
+`;
+
+const MarkerImage = styled.Image`
+	width: 25px;
+	height: 25px;
 `;
 
 export default RouteMap;

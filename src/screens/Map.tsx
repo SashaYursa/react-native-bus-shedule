@@ -242,9 +242,9 @@ const Map = ({
 					name={waypoints.first.name}
 					setSelectedMarker={setSelectedMarkerHandler}
 					removeSelectedMarker={() => setSelectedMarker(null)}
-					position={waypoints.first.position}
-					icon={require('../assets/bus-station.png')}
-				/>
+					position={waypoints.first.position}>
+					<MarkerImage source={require('../assets/bus-station.png')} />
+				</MapMarker>
 
 				{waypoints?.middle?.map((waypoint, index) => (
 					<MapMarker
@@ -254,9 +254,9 @@ const Map = ({
 						isSelected={selectedMarker?.id === waypoint.id}
 						setSelectedMarker={setSelectedMarkerHandler}
 						removeSelectedMarker={() => setSelectedMarker(null)}
-						key={index}
-						icon={require('../assets/pin.png')}
-					/>
+						key={index}>
+						<MarkerImage source={require('../assets/pin.png')} />
+					</MapMarker>
 				))}
 
 				<MapMarker
@@ -265,9 +265,9 @@ const Map = ({
 					name={waypoints.last.name}
 					setSelectedMarker={setSelectedMarkerHandler}
 					removeSelectedMarker={() => setSelectedMarker(null)}
-					position={waypoints.last.position}
-					icon={require('../assets/bus-station.png')}
-				/>
+					position={waypoints.last.position}>
+					<MarkerImage source={require('../assets/bus-station.png')} />
+				</MapMarker>
 			</MapView>
 		</Container>
 	);
@@ -306,6 +306,11 @@ const EditPointContainer = styled.View`
 	z-index: 2;
 	align-items: center;
 	justify-content: center;
+`;
+
+const MarkerImage = styled.Image`
+	width: 25px;
+	height: 25px;
 `;
 
 export default Map;
