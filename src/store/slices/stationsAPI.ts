@@ -8,6 +8,10 @@ import {
 import { DEFAULT_API_URL } from '../../utils/constants';
 import socket from '../../socket';
 import { addTime } from './stationTimesSlice';
+console.log(
+	DEFAULT_API_URL,
+	'default url ===============================================',
+);
 
 interface addBusLocation {
 	id: number;
@@ -83,19 +87,21 @@ export const stationApi = createApi({
 									isLoading: false,
 								};
 							});
-							interval = setInterval(() => {
-								updateCachedData(data => {
-									return {
-										...data,
-										isLoading: true,
-									};
-								});
+							interval = Number(
+								setInterval(() => {
+									updateCachedData(data => {
+										return {
+											...data,
+											isLoading: true,
+										};
+									});
 
-								socket.emit('bus:update-shedule:server', {
-									busStationId: id,
-									lastUpdate: response.lastUpdate,
-								});
-							}, UPDATE_SHEDULE_TIME);
+									socket.emit('bus:update-shedule:server', {
+										busStationId: id,
+										lastUpdate: response.lastUpdate,
+									});
+								}, UPDATE_SHEDULE_TIME),
+							);
 						} else {
 							updateCachedData(draft => {
 								return {

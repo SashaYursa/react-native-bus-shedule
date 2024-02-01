@@ -1,6 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Text, View, Animated } from 'react-native';
-import { useLazyGetStationsQuery } from '../store/slices/stationsAPI';
+import {
+	useGetStationsQuery,
+	useLazyGetStationsQuery,
+} from '../store/slices/stationsAPI';
 import styled from 'styled-components/native';
 import { IBusStations } from '../store/types';
 import Search from '../components/Search';
@@ -18,6 +21,12 @@ const BusStations = ({
 	navigation,
 }: NativeStackScreenProps<BusStackParamList, 'BusStations'>) => {
 	const netInfo = useNetInfo();
+	const {
+		isError: fiserr,
+		isFetching: fdata,
+		error: ferr,
+	} = useGetStationsQuery();
+
 	const stations = useAppSelector(state => state.busStations);
 
 	const [getStations, { isError, isFetching, error }] =
@@ -36,10 +45,18 @@ const BusStations = ({
 		}),
 	).current;
 
-	if (netInfo.isConnected && !stations.length) {
-		console.log('need to fetch');
-		getStations();
-	}
+	useEffect(() => {
+		console.log(fdata, 'data');
+		console.log(fiserr, 'isError');
+		console.log(ferr, 'err');
+	}, [fdata, ferr, fiserr]);
+
+	useEffect(() => {
+		if (netInfo.isConnected && !stations.length) {
+			console.log('need to fetch');
+			getStations();
+		}
+	}, [netInfo.isConnected]);
 
 	if (isError) {
 		console.log('error ---> ', error);

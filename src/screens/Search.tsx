@@ -53,7 +53,7 @@ const Search = ({
 			<ErrorLoad
 				actionHandler={() => navigation.goBack()}
 				actionText="На головну"
-				errorText="Помилка при завантаженні станці"
+				errorText="Помилка при завантаженні"
 			/>
 		);
 	}
