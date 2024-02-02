@@ -22,11 +22,6 @@ const BusStations = ({
 	navigation,
 }: NativeStackScreenProps<BusStackParamList, 'BusStations'>) => {
 	const netInfo = useNetInfo();
-	const {
-		isError: fiserr,
-		isFetching: fdata,
-		error: ferr,
-	} = useGetStationsQuery();
 
 	const stations = useAppSelector(state => state.busStations);
 
@@ -48,21 +43,10 @@ const BusStations = ({
 	).current;
 
 	useEffect(() => {
-		console.log(fdata, 'data');
-		console.log(fiserr, 'isError');
-		console.log(ferr, 'err');
-	}, [fdata, ferr, fiserr]);
-
-	useEffect(() => {
 		if (netInfo.isConnected && !stations.length) {
-			console.log('need to fetch');
 			getStations();
 		}
 	}, [netInfo.isConnected]);
-
-	if (isError) {
-		console.log('error ---> ', error);
-	}
 
 	const updateFilter = (value: string) => {
 		if (value.length > 2) {

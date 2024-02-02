@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNetInfo } from '@react-native-community/netinfo';
 import styled from 'styled-components/native';
@@ -9,6 +9,10 @@ const InternetConnection: React.FC<PropsWithChildren<Props>> = ({
 	children,
 }) => {
 	const netInfo = useNetInfo();
+
+	if (netInfo.details === null) {
+		return <></>;
+	}
 
 	return netInfo.isConnected ? (
 		children

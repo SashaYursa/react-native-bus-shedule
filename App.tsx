@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navigation from './src/navigation/Navigation';
 import { Provider } from 'react-redux';
 import { persistor, store } from './src/store';

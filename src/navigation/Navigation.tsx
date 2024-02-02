@@ -8,7 +8,6 @@ import {
 	BottomTabScreenProps,
 } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import Search from '../screens/Search';
 import BusStations from '../screens/BusStations';
 import Map from '../screens/Map';
@@ -16,12 +15,13 @@ import Info from '../screens/Info';
 import StationShedule from '../screens/StationShedule';
 import Route from '../screens/Route';
 
-import { IBusStations, ISheduleItem } from '../store/types';
+import { IBusStations } from '../store/types';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MDIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import StationTimes from '../screens/StationTimes';
-import { TouchableOpacity, View } from 'react-native';
+
+import BootSplash from 'react-native-bootsplash';
 
 type Props = {};
 
@@ -117,7 +117,7 @@ const RouteNavigation = () => {
 
 const Navigation: React.FC<Props> = (props: Props) => {
 	return (
-		<NavigationContainer>
+		<NavigationContainer onReady={() => BootSplash.hide()}>
 			<BottomTab.Navigator
 				screenOptions={{
 					tabBarShowLabel: false,
