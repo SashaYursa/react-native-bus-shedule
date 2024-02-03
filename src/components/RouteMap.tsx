@@ -52,9 +52,6 @@ const RouteMap = ({ waypoints, navigateToMapScreen }: Props) => {
 					optimizeWaypoints={true}
 					strokeColor="hotpink"
 					strokeWidth={3}
-					onError={error => {
-						console.log('error', error);
-					}}
 					waypoints={middleWayPointsForDirection.map(
 						(wp: waypoint) => wp.position,
 					)}

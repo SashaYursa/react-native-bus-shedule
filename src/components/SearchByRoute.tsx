@@ -77,7 +77,6 @@ const SearchByRoute = ({
 
 	useEffect(() => {
 		if (selectedStation) {
-			console.log('getRoutes----');
 			getRoutes(selectedStation?.id);
 		}
 	}, [selectedStation]);

@@ -57,8 +57,6 @@ const StationTimes = ({
 		}
 	}, [route.params, netInfo]);
 
-	console.log(stationTimes?.length);
-
 	useEffect(() => {
 		if (isRefreshing) {
 			getTimes(route.params.station.id);

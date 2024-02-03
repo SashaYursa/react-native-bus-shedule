@@ -125,7 +125,6 @@ const Map = ({
 
 	const updateMapPoint = () => {
 		if (newMapPointRegion && selectedMarker) {
-			console.log({ newMapPointRegion }, '   ', selectedMarker);
 			if (!selectedMarker.latitude && !selectedMarker.station.latitude) {
 				addBusStationLocation({
 					id: selectedMarker.station.id,
@@ -140,8 +139,6 @@ const Map = ({
 				});
 			}
 			setSelectedMarker(null);
-		} else {
-			console.log('no new point region in Map->updateMapPointRegion');
 		}
 	};
 	const cancelCreateMapPoint = () => {

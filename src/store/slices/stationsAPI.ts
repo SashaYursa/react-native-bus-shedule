@@ -8,10 +8,6 @@ import {
 import { DEFAULT_API_URL } from '../../utils/constants';
 import socket from '../../socket';
 import { addTime } from './stationTimesSlice';
-console.log(
-	DEFAULT_API_URL,
-	'default url ===============================================',
-);
 
 interface addBusLocation {
 	id: number;
@@ -75,7 +71,6 @@ export const stationApi = createApi({
 					lastUpdate: result.data.lastUpdate,
 				});
 				socket.on('bus:update-shedule:client', (response: sheduleUpdate) => {
-					console.log('recive');
 					if (response.shedule?.station.id === id) {
 						if (interval) {
 							clearInterval(interval);
@@ -110,7 +105,6 @@ export const stationApi = createApi({
 									error: response.error,
 								};
 							});
-							console.log('response error');
 						}
 					}
 				});

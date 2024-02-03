@@ -59,7 +59,6 @@ const SearchFieldWithDropdown = ({
 			<Collapsible
 				collapsed={collapsed}
 				onAnimationEnd={() => {
-					console.log('anim', animationEnd);
 					if (collapsed) {
 						setAnimationEnd(false);
 					} else {
